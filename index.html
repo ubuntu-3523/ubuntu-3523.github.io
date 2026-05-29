@@ -1,0 +1,750 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>동환샘의 교육자료 나눔교실</title>
+<meta name="description" content="초등학교 교사 이동환의 교육자료 나눔 사이트 — 메이커·AI·에듀테크·과학·코딩">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1a2236;--ink2:#3a4a6b;--ink3:#7a8aa8;--cream:#faf8f3;--paper:#f3efe6;--paper2:#ede8de;--coral:#f0614a;--coral-l:#ffe8e5;--sky:#3b82f6;--gold:#f59e0b;--mint:#10b981;--mint-l:#d1fae5;--purple:#8b5cf6;--border:rgba(26,34,54,.1);--sh:0 2px 16px rgba(26,34,54,.08);--sh2:0 8px 40px rgba(26,34,54,.14)}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Noto Sans KR',sans-serif;background:var(--cream);color:var(--ink);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;pointer-events:none;z-index:0;background-image:radial-gradient(ellipse at 20% 30%,rgba(240,97,74,.04) 0%,transparent 60%),radial-gradient(ellipse at 80% 70%,rgba(59,130,246,.04) 0%,transparent 60%)}
+.nav{position:fixed;top:0;left:0;right:0;z-index:200;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;background:rgba(250,248,243,.9);backdrop-filter:blur(14px);border-bottom:1px solid var(--border)}
+.nav-logo{font-family:'Jua',sans-serif;font-size:18px;color:var(--ink);text-decoration:none;display:flex;align-items:center;gap:8px}
+.nav-logo span{color:var(--coral)}
+.nav-links{display:flex;gap:4px}
+.nav-links a{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:500;color:var(--ink2);text-decoration:none;transition:.2s}
+.nav-links a:hover{background:var(--paper);color:var(--coral)}
+.hamburger{display:none;background:none;border:none;font-size:20px;color:var(--ink);cursor:pointer}
+.mobile-nav{display:none;flex-direction:column;position:fixed;top:56px;left:0;right:0;z-index:199;background:var(--cream);border-bottom:1px solid var(--border);padding:8px 12px 16px;box-shadow:var(--sh2)}
+.mobile-nav.show{display:flex}
+.mobile-nav a{padding:13px 16px;border-radius:12px;font-size:15px;font-weight:500;color:var(--ink);text-decoration:none;transition:.15s}
+.mobile-nav a:hover{background:var(--paper)}
+.hero{position:relative;overflow:hidden;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:80px 20px 60px}
+.hero-grid{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(rgba(26,34,54,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(26,34,54,.05) 1px,transparent 1px);background-size:40px 40px}
+.floaters{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.floater{position:absolute;font-size:28px;opacity:.1;animation:float linear infinite}
+.floater:nth-child(1){left:8%;top:15%;animation-duration:18s}
+.floater:nth-child(2){left:88%;top:22%;animation-duration:22s;animation-delay:-6s}
+.floater:nth-child(3){left:22%;top:72%;animation-duration:16s;animation-delay:-3s}
+.floater:nth-child(4){left:76%;top:68%;animation-duration:20s;animation-delay:-9s}
+.floater:nth-child(5){left:50%;top:10%;animation-duration:24s;animation-delay:-12s}
+.floater:nth-child(6){left:35%;top:85%;animation-duration:19s;animation-delay:-5s}
+.floater:nth-child(7){left:92%;top:50%;animation-duration:21s;animation-delay:-8s}
+.floater:nth-child(8){left:5%;top:55%;animation-duration:17s;animation-delay:-14s}
+@keyframes float{0%{transform:translateY(0) rotate(0deg)}33%{transform:translateY(-22px) rotate(5deg)}66%{transform:translateY(10px) rotate(-4deg)}100%{transform:translateY(0) rotate(0deg)}}
+.hero-inner{position:relative;z-index:1;max-width:680px;text-align:center}
+.hero-chip{display:inline-flex;align-items:center;gap:6px;background:#fff3e0;color:var(--coral);border:1.5px solid rgba(240,97,74,.25);padding:5px 16px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;margin-bottom:24px;animation:popIn .5s cubic-bezier(.34,1.56,.64,1) both}
+.hero-title{font-family:'Jua',sans-serif;font-size:clamp(44px,11vw,84px);line-height:1.1;color:var(--ink);margin-bottom:20px;animation:slideUp .6s .1s ease both;letter-spacing:-0.01em}
+.hero-title .accent{color:var(--coral)}
+.hero-title .highlight{color:#fff;background:var(--coral);padding:0 12px 4px;border-radius:10px;display:inline-block;margin-top:4px;transform:rotate(-1deg);box-shadow:4px 4px 0 rgba(26,34,54,.15)}
+.hero-sub{font-size:clamp(14px,3vw,17px);color:var(--ink2);line-height:1.9;margin-bottom:36px;animation:slideUp .6s .2s ease both}
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;animation:slideUp .6s .3s ease both}
+.btn{display:inline-flex;align-items:center;gap:8px;padding:14px 26px;border-radius:14px;font-size:15px;font-weight:700;font-family:inherit;text-decoration:none;border:none;cursor:pointer;transition:transform .18s,box-shadow .18s}
+.btn:hover{transform:translateY(-3px)}
+.btn-fill{background:var(--coral);color:#fff;box-shadow:0 4px 20px rgba(240,97,74,.35)}
+.btn-fill:hover{box-shadow:0 8px 28px rgba(240,97,74,.45)}
+.btn-outline{background:transparent;color:var(--ink);border:2px solid var(--border)}
+.btn-outline:hover{border-color:var(--ink2);background:var(--paper)}
+.hero-stats{display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:52px;padding-top:36px;border-top:1px dashed var(--border);animation:slideUp .6s .4s ease both}
+.stat{text-align:center}
+.stat-n{font-family:'Jua',sans-serif;font-size:30px;color:var(--coral);line-height:1}
+.stat-l{font-size:12px;color:var(--ink3);margin-top:4px}
+.scroll-down{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--ink3);font-size:10px;letter-spacing:.12em;animation:bounce 2.5s ease-in-out infinite}
+@keyframes bounce{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.section{padding:80px 20px;position:relative}
+.section-inner{max-width:960px;margin:0 auto}
+.section-alt{background:var(--paper)}
+.eyebrow{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--coral);margin-bottom:10px}
+.section-h{font-family:'Jua',sans-serif;font-size:clamp(24px,6vw,38px);color:var(--ink);line-height:1.2;margin-bottom:10px}
+.section-p{font-size:15px;color:var(--ink2);max-width:440px;line-height:1.8}
+.about-wrap{display:grid;grid-template-columns:auto 1fr;gap:48px;align-items:start;margin-top:48px}
+.about-card{background:var(--paper2);border-radius:24px;padding:28px 24px;text-align:center;min-width:200px;max-width:220px;border:1.5px solid var(--border);position:relative}
+.about-card::before{content:'📌';position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:22px}
+.about-emo{font-size:64px;display:block;margin-bottom:12px}
+.about-name{font-family:'Jua',sans-serif;font-size:20px;color:var(--ink);margin-bottom:4px}
+.about-role{font-size:13px;color:var(--ink3);margin-bottom:16px}
+.chip-row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+.chip{font-size:11px;padding:4px 12px;border-radius:20px;background:#fff;color:var(--ink2);border:1px solid var(--border)}
+.about-body{display:flex;flex-direction:column;gap:18px}
+.about-body p{font-size:15px;color:var(--ink2);line-height:2}
+.hl-list{display:flex;flex-direction:column;gap:10px;margin-top:4px}
+.hl{display:flex;gap:12px;align-items:flex-start;padding:14px 16px;border-radius:14px;background:#fff;border:1.5px solid var(--border)}
+.hl-ico{font-size:20px;flex-shrink:0}
+.hl-txt{font-size:13px;color:var(--ink2);line-height:1.7}
+.hl-txt b{color:var(--ink)}
+.mat-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:0;flex-wrap:wrap;gap:12px}
+.cat-tabs{display:flex;gap:10px;margin:24px 0 28px;flex-wrap:wrap}
+.cat-tab{display:flex;align-items:center;gap:8px;padding:12px 22px;border-radius:16px;border:2px solid var(--border);background:#fff;color:var(--ink2);cursor:pointer;font-family:inherit;font-size:14px;font-weight:700;transition:.2s;position:relative}
+.cat-tab:hover{border-color:var(--coral);color:var(--coral)}
+.cat-tab.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.ct-ico{font-size:18px}
+.ct-count{background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-size:11px;margin-left:2px}
+.cat-tab:not(.active) .ct-count{background:var(--paper2);color:var(--ink3)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+.empty-card{background:#fff;border-radius:18px;border:2px dashed var(--border);padding:40px 20px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px}
+.empty-ico{font-size:40px;opacity:.4}
+.empty-txt{font-size:14px;color:var(--ink3);line-height:1.7}
+.add-btn{display:flex;align-items:center;gap:8px;margin:20px auto 0;padding:12px 28px;border-radius:50px;border:2px dashed var(--coral);background:transparent;color:var(--coral);font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s}
+.add-btn:hover{background:var(--coral);color:#fff}
+/* 자료 추가 폼 모달 */
+.form-overlay{position:fixed;inset:0;z-index:400;background:rgba(10,14,26,.6);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.form-overlay.open{opacity:1;pointer-events:auto}
+@media(min-width:600px){.form-overlay{align-items:center;padding:20px}}
+.form-modal{background:#fff;width:100%;max-width:520px;border-radius:24px 24px 0 0;max-height:92vh;overflow-y:auto;transform:translateY(40px);transition:transform .28s cubic-bezier(.34,1.3,.64,1);box-shadow:0 -4px 40px rgba(0,0,0,.2)}
+@media(min-width:600px){.form-modal{border-radius:24px;transform:scale(.92)}}
+.form-overlay.open .form-modal{transform:translateY(0) scale(1)}
+.form-handle{width:40px;height:4px;border-radius:2px;background:var(--paper2);margin:14px auto 0}
+@media(min-width:600px){.form-handle{display:none}}
+.form-head{padding:20px 24px 16px;border-bottom:1px solid var(--paper);display:flex;justify-content:space-between;align-items:center}
+.form-title{font-family:'Jua',sans-serif;font-size:18px;color:var(--ink)}
+.form-close{background:var(--paper);border:none;border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center;transition:.15s}
+.form-close:hover{background:var(--paper2)}
+.form-body{padding:20px 24px 28px;display:flex;flex-direction:column;gap:14px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-label{font-size:13px;font-weight:700;color:var(--ink2)}
+.form-label span{color:var(--coral);margin-left:2px}
+.form-input,.form-textarea{padding:11px 14px;border-radius:12px;border:1.5px solid var(--border);font-size:14px;font-family:inherit;color:var(--ink);background:#fff;transition:.2s;outline:none;width:100%}
+.form-input:focus,.form-textarea:focus{border-color:var(--coral);box-shadow:0 0 0 3px rgba(240,97,74,.1)}
+.form-textarea{resize:vertical;min-height:80px;line-height:1.7}
+.form-hint{font-size:11px;color:var(--ink3)}
+.color-row{display:flex;gap:8px;flex-wrap:wrap}
+.color-chip{width:32px;height:32px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.15s;position:relative}
+.color-chip.selected{border-color:var(--ink);transform:scale(1.15)}
+.emoji-row{display:flex;gap:6px;flex-wrap:wrap}
+.emoji-chip{width:38px;height:38px;border-radius:10px;border:1.5px solid var(--border);background:var(--paper);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.15s}
+.emoji-chip.selected,.emoji-chip:hover{border-color:var(--coral);background:var(--coral-l)}
+.form-submit{padding:14px;border-radius:14px;background:var(--coral);color:#fff;border:none;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;transition:.2s;margin-top:4px}
+.form-submit:hover{background:#d9533e;transform:translateY(-2px)}
+/* 삭제 버튼 */
+.card-del{position:absolute;top:10px;right:10px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:28px;height:28px;font-size:13px;cursor:pointer;display:none;align-items:center;justify-content:center;color:#999;transition:.15s;z-index:2}
+.mat-card:hover .card-del{display:flex}
+.card-del:hover{background:#fee2e2;color:var(--coral)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:18px}
+.mat-card{background:#fff;border-radius:18px;border:1.5px solid var(--border);box-shadow:var(--sh);overflow:hidden;cursor:pointer;transition:transform .22s cubic-bezier(.34,1.3,.64,1),box-shadow .22s;position:relative}
+.mat-card::after{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:var(--card-accent,var(--coral));border-radius:18px 18px 0 0}
+.mat-card:hover{transform:translateY(-8px) rotate(.4deg);box-shadow:var(--sh2)}
+.card-head{padding:22px 22px 14px}
+.card-icon-wrap{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:24px;margin-bottom:14px}
+.card-badges{display:flex;gap:6px;align-items:center;margin-bottom:10px}
+.badge{font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;letter-spacing:.04em;text-transform:uppercase}
+.badge-new{background:#fef3c7;color:#92400e}
+.grade-txt{font-size:11px;color:var(--ink3)}
+.card-title{font-size:17px;font-weight:700;color:var(--ink);line-height:1.4;margin-bottom:8px}
+.card-desc{font-size:13px;color:var(--ink2);line-height:1.75}
+.card-tags{display:flex;gap:5px;flex-wrap:wrap;padding:0 22px 16px}
+.ctag{font-size:11px;padding:3px 10px;border-radius:8px;background:var(--paper);color:var(--ink3)}
+.card-foot{padding:12px 22px;border-top:1px solid var(--paper);display:flex;align-items:center;justify-content:space-between}
+.open-txt{font-size:13px;font-weight:700;color:var(--coral);display:flex;align-items:center;gap:4px}
+.open-arrow{transition:transform .2s}
+.mat-card:hover .open-arrow{transform:translateX(4px)}
+.steps{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;margin-top:40px}
+.step{background:#fff;border-radius:18px;padding:24px;border:1.5px solid var(--border);box-shadow:var(--sh);position:relative;overflow:hidden}
+.step-num{font-family:'Jua',sans-serif;font-size:72px;line-height:1;position:absolute;bottom:-8px;right:12px;color:var(--paper2);pointer-events:none;user-select:none}
+.step-ico{font-size:30px;margin-bottom:12px}
+.step-title{font-size:15px;font-weight:700;margin-bottom:8px}
+.step-desc{font-size:13px;color:var(--ink2);line-height:1.7;position:relative;z-index:1}
+.github-box{background:var(--ink);color:#fff;border-radius:24px;padding:36px 32px;margin-top:48px;position:relative;overflow:hidden}
+.github-box::before{content:'';position:absolute;top:-60px;right:-60px;width:220px;height:220px;border-radius:50%;background:rgba(240,97,74,.12)}
+.github-box::after{content:'';position:absolute;bottom:-40px;left:-40px;width:160px;height:160px;border-radius:50%;background:rgba(59,130,246,.1)}
+.gh-inner{position:relative;z-index:1}
+.gh-title{font-family:'Jua',sans-serif;font-size:24px;margin-bottom:12px}
+.gh-title span{color:var(--coral)}
+.gh-sub{font-size:14px;color:rgba(255,255,255,.65);line-height:1.9;margin-bottom:24px}
+.gh-steps{display:flex;flex-direction:column;gap:10px;margin-bottom:28px}
+.gh-step{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.06);border-radius:12px;padding:12px 16px}
+.gh-step-num{width:24px;height:24px;border-radius:50%;background:var(--coral);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.gh-step-txt{font-size:13px;color:rgba(255,255,255,.8);line-height:1.7}
+.gh-step-txt code{background:rgba(255,255,255,.12);padding:1px 8px;border-radius:6px;font-size:12px;font-family:monospace;color:#95d5b2}
+.gh-link{display:inline-flex;align-items:center;gap:8px;background:var(--coral);color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:700;text-decoration:none;transition:.2s}
+.gh-link:hover{background:#d9533e;transform:translateY(-2px)}
+.contact-grid{display:flex;gap:14px;flex-wrap:wrap;margin-top:36px}
+.contact-btn{display:flex;align-items:center;gap:12px;padding:16px 22px;border-radius:16px;background:#fff;border:1.5px solid var(--border);text-decoration:none;color:var(--ink);box-shadow:var(--sh);transition:.2s}
+.contact-btn:hover{transform:translateY(-3px);box-shadow:var(--sh2);border-color:var(--coral)}
+.cb-ico{font-size:26px}
+.cb-title{font-size:14px;font-weight:700}
+.cb-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+footer{background:var(--ink);color:rgba(255,255,255,.45);padding:32px 20px;text-align:center;font-size:13px;line-height:2}
+footer a{color:rgba(255,255,255,.7)}
+footer strong{color:rgba(255,255,255,.9)}
+.overlay{position:fixed;inset:0;z-index:300;background:rgba(10,14,26,.55);backdrop-filter:blur(6px);display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.overlay.open{opacity:1;pointer-events:auto}
+.modal{background:#fff;width:100%;max-width:480px;border-radius:24px 24px 0 0;max-height:88vh;overflow-y:auto;transform:translateY(40px);transition:transform .28s cubic-bezier(.34,1.3,.64,1);box-shadow:0 -4px 40px rgba(0,0,0,.18)}
+.overlay.open .modal{transform:translateY(0)}
+.modal-handle{width:40px;height:4px;border-radius:2px;background:var(--paper2);margin:14px auto 0}
+.modal-head{padding:20px 24px 16px;border-bottom:1px solid var(--paper);display:flex;justify-content:space-between;align-items:flex-start}
+.modal-close{background:var(--paper);border:none;border-radius:50%;width:32px;height:32px;font-size:15px;cursor:pointer;color:var(--ink2);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:12px;transition:.15s}
+.modal-close:hover{background:var(--paper2)}
+.modal-body{padding:20px 24px 32px}
+.modal-desc{font-size:14px;color:var(--ink2);line-height:1.85;margin-bottom:20px}
+.modal-links{display:flex;flex-direction:column;gap:10px}
+.mlink{display:flex;align-items:center;gap:14px;padding:16px 18px;border-radius:14px;background:var(--paper);border:1.5px solid var(--border);text-decoration:none;color:var(--ink);transition:.18s}
+.mlink:hover{border-color:var(--coral);background:#fff3e0}
+.mlink-ico{font-size:24px;flex-shrink:0}
+.mlink-title{font-size:14px;font-weight:700}
+.mlink-sub{font-size:12px;color:var(--ink3);margin-top:2px}
+.mlink-arr{margin-left:auto;font-size:18px;color:var(--coral);opacity:0;transition:.18s}
+.mlink:hover .mlink-arr{opacity:1;transform:translateX(3px)}
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .55s ease,transform .55s ease}
+.reveal.in{opacity:1;transform:none}
+@keyframes popIn{from{opacity:0;transform:scale(.8)}to{opacity:1;transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:640px){
+  .nav-links{display:none}
+  .hamburger{display:block}
+  .about-wrap{grid-template-columns:1fr}
+  .about-card{max-width:100%;min-width:0}
+  .about-card::before{display:none}
+  .section{padding:60px 16px}
+  .github-box{padding:24px 20px}
+  .overlay{align-items:flex-end}
+}
+@media(min-width:600px){
+  .overlay{align-items:center;padding:20px}
+  .modal{border-radius:24px;transform:scale(.92) translateY(20px);box-shadow:0 24px 64px rgba(0,0,0,.2)}
+  .overlay.open .modal{transform:scale(1) translateY(0)}
+  .modal-handle{display:none}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <a href="#" class="nav-logo">✏️ <span>동환샘</span>의 나눔교실</a>
+  <div class="nav-links">
+    <a href="#about">소개</a>
+    <a href="#materials">자료실</a>
+    <a href="#github">깃허브 안내</a>
+    <a href="#contact">연락</a>
+  </div>
+  <button class="hamburger" onclick="toggleNav()">☰</button>
+</nav>
+<nav class="mobile-nav" id="mnav">
+  <a href="#about"     onclick="closeMNav()">👋 소개</a>
+  <a href="#materials" onclick="closeMNav()">📚 자료실</a>
+  <a href="#github"    onclick="closeMNav()">🐙 깃허브 안내</a>
+  <a href="#contact"   onclick="closeMNav()">📬 연락하기</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-grid"></div>
+  <div class="floaters" aria-hidden="true">
+    <span class="floater">🔬</span><span class="floater">❤️</span>
+    <span class="floater">🫁</span><span class="floater">🧠</span>
+    <span class="floater">📚</span><span class="floater">✏️</span>
+    <span class="floater">🍎</span><span class="floater">🔭</span>
+  </div>
+  <div class="hero-inner">
+    <div class="hero-chip">🌟 초등 교육자료 무료 나눔</div>
+    <h1 class="hero-title">
+      <span class="accent">동환샘</span>의<br>
+      교육자료<span class="highlight"> 나눔교실</span>
+    </h1>
+    <p class="hero-sub">
+      메이커·AI·에듀테크·과학·코딩 분야의 교육자료를 무료로 나눠요.<br>
+      스마트폰·웨일북·PC 어디서든 링크 하나로 OK!
+    </p>
+    <div class="hero-cta">
+      <a href="#materials" class="btn btn-fill">📚 자료 보러가기</a>
+      <a href="#about"     class="btn btn-outline">선생님 소개 →</a>
+    </div>
+    <div class="hero-stats">
+      <div class="stat"><div class="stat-n">5</div><div class="stat-l">교육 프로그램</div></div>
+      <div class="stat"><div class="stat-n">25+</div><div class="stat-l">퀴즈 문제</div></div>
+      <div class="stat"><div class="stat-n">100%</div><div class="stat-l">무료 제공</div></div>
+      <div class="stat"><div class="stat-n">📱</div><div class="stat-l">모바일 최적화</div></div>
+    </div>
+  </div>
+  <div class="scroll-down" aria-hidden="true">SCROLL ↓</div>
+</section>
+
+<!-- ABOUT -->
+<section class="section section-alt" id="about">
+  <div class="section-inner">
+    <div class="eyebrow reveal">✦ ABOUT ME</div>
+    <h2 class="section-h reveal">안녕하세요!</h2>
+    <p class="section-p reveal">수업을 더 재미있게 만들고 싶은 선생님입니다.</p>
+    <div class="about-wrap">
+      <div class="about-card reveal">
+        <span class="about-emo">👨‍🏫</span>
+        <div class="about-name">이동환 선생님</div>
+        <div class="about-role">초등학교 교사</div>
+        <div class="chip-row">
+          <span class="chip">🛠 메이커</span><span class="chip">🤖 AI</span>
+          <span class="chip">💻 에듀테크</span><span class="chip">🔬 과학</span>
+          <span class="chip">👾 코딩</span>
+        </div>
+      </div>
+      <div class="about-body reveal">
+        <p>안녕하세요, 초등학교 교사 <strong>이동환</strong>입니다. 메이커·AI·에듀테크·과학·코딩을 사랑하는 선생님으로, 아이들이 직접 만들고 탐험하며 배우는 수업을 만들고 있어요.</p>
+        <p>이 사이트의 모든 자료는 <strong>스마트폰·웨일북에서 링크 하나로 바로 실행</strong>돼요. 설치도, 다운로드도 필요 없어요!</p>
+        <div class="hl-list">
+          <div class="hl"><div class="hl-ico">🛠</div><div class="hl-txt"><b>메이커 교육</b> — 직접 만들고 문제를 해결하는 창의적 수업</div></div>
+          <div class="hl"><div class="hl-ico">🤖</div><div class="hl-txt"><b>AI·에듀테크 활용</b> — 최신 기술로 더 재미있게 배우는 교실</div></div>
+          <div class="hl"><div class="hl-ico">🎮</div><div class="hl-txt"><b>인터랙티브 과학·코딩</b> — 누르고 탐험하는 체험형 교육자료</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MATERIALS -->
+<section class="section" id="materials">
+  <div class="section-inner">
+    <div class="eyebrow reveal">✦ MATERIALS</div>
+    <div class="mat-header">
+      <div>
+        <h2 class="section-h reveal">교육 자료실</h2>
+        <p class="section-p reveal">탭으로 카테고리를 선택하고, 카드를 눌러 바로 열어보세요!</p>
+      </div>
+    </div>
+
+    <!-- 탭 -->
+    <div class="cat-tabs reveal">
+      <button class="cat-tab active" onclick="switchTab('class',this)">
+        <span class="ct-ico">🔬</span>
+        <span class="ct-label">과학수업자료</span>
+        <span class="ct-count" id="cnt-class"></span>
+      </button>
+      <button class="cat-tab" onclick="switchTab('work',this)">
+        <span class="ct-ico">💼</span>
+        <span class="ct-label">업무 도구</span>
+        <span class="ct-count" id="cnt-work"></span>
+      </button>
+      <button class="cat-tab" onclick="switchTab('hobby',this)">
+        <span class="ct-ico">🎨</span>
+        <span class="ct-label">취미생활</span>
+        <span class="ct-count" id="cnt-hobby"></span>
+      </button>
+    </div>
+
+    <!-- 과학수업자료 탭 -->
+    <div class="tab-panel active" id="tab-class">
+      <div class="grid" id="grid-class">
+        <article class="mat-card reveal" onclick="openModal('body')" style="--card-accent:#f0614a">
+          <div class="card-head">
+            <div class="card-icon-wrap" style="background:#fff3e0">🫀</div>
+            <div class="card-badges"><span class="badge" style="background:#fff3e0;color:#c45200">SCIENCE</span><span class="badge badge-new">NEW</span><span class="grade-txt">5학년 4~8차시</span></div>
+            <div class="card-title">우리 몸의 구조와 기능 (통합)</div>
+            <div class="card-desc">소화·호흡·순환·배설·기관 협력까지 한 파일에! 탭으로 차시 이동, 퀴즈 포함.</div>
+          </div>
+          <div class="card-tags"><span class="ctag">소화</span><span class="ctag">호흡</span><span class="ctag">혈액순환</span><span class="ctag">배설</span><span class="ctag">퀴즈</span></div>
+          <div class="card-foot"><span class="open-txt">자료 열기 <span class="open-arrow">→</span></span></div>
+        </article>
+      </div>
+      <button class="add-btn" onclick="openAddForm('class')">＋ 과학수업자료 추가</button>
+    </div>
+
+    <!-- 업무 도구 탭 -->
+    <div class="tab-panel" id="tab-work">
+      <div class="grid" id="grid-work">
+        <article class="mat-card reveal" onclick="openModal('gpt')" style="--card-accent:#10a37f">
+          <div class="card-head">
+            <div class="card-icon-wrap" style="background:#e6f7f3">🤖</div>
+            <div class="card-badges"><span class="badge" style="background:#e6f7f3;color:#0a6b52">GPT</span><span class="badge badge-new">NEW</span><span class="grade-txt">ChatGPT Custom GPT</span></div>
+            <div class="card-title">에듀파인 물품구입 비서</div>
+            <div class="card-desc">에듀파인 업로드 엑셀 파일과 품의개요를 자동으로 작성해주는 GPT입니다. 견적서나 장바구니 내용(드래그 복사)을 입력하고 품의를 쉽게 끝내세요!</div>
+          </div>
+          <div class="card-tags"><span class="ctag">에듀파인</span><span class="ctag">물품구입</span><span class="ctag">행정도우미</span><span class="ctag">AI GPT</span></div>
+          <div class="card-foot"><span class="open-txt">GPT 열기 <span class="open-arrow">→</span></span></div>
+        </article>
+      </div>
+      <button class="add-btn" onclick="openAddForm('work')">＋ 업무 자료 추가</button>
+    </div>
+
+    <!-- 취미생활 탭 -->
+    <div class="tab-panel" id="tab-hobby">
+      <div class="grid" id="grid-hobby">
+        <div class="empty-card reveal" id="hobby-empty">
+          <div class="empty-ico">🎨</div>
+          <div class="empty-txt">아직 자료가 없어요.<br>아래 버튼으로 추가해 보세요!</div>
+        </div>
+      </div>
+      <button class="add-btn" onclick="openAddForm('hobby')">＋ 취미 자료 추가</button>
+    </div>
+
+  </div>
+</section>
+
+<section class="section section-alt">
+  <div class="section-inner">
+    <div class="eyebrow reveal">✦ HOW TO USE</div>
+    <h2 class="section-h reveal">이용 방법</h2>
+    <p class="section-p reveal">링크 하나로 어디서든, 설치 없이 사용해요!</p>
+    <div class="steps">
+      <div class="step reveal"><div class="step-num">1</div><div class="step-ico">👆</div><div class="step-title">카드 누르기</div><div class="step-desc">원하는 자료 카드를 누르면 상세 안내가 나와요.</div></div>
+      <div class="step reveal"><div class="step-num">2</div><div class="step-ico">🔗</div><div class="step-title">링크 공유</div><div class="step-desc">밴드·카카오로 학생·학부모에게 링크를 보내세요.</div></div>
+      <div class="step reveal"><div class="step-num">3</div><div class="step-ico">🎮</div><div class="step-title">바로 학습</div><div class="step-desc">터치·클릭으로 탐험하고 퀴즈로 복습해요!</div></div>
+      <div class="step reveal"><div class="step-num">4</div><div class="step-ico">💾</div><div class="step-title">오프라인 저장</div><div class="step-desc">HTML 다운로드 시 인터넷 없이도 사용 가능!</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- GITHUB -->
+<section class="section" id="github">
+  <div class="section-inner">
+    <div class="eyebrow reveal">✦ GITHUB PAGES</div>
+    <h2 class="section-h reveal">나만의 사이트 만들기</h2>
+    <p class="section-p reveal">GitHub Pages로 무료로 자신만의 URL에 사이트를 올릴 수 있어요.</p>
+    <div class="github-box reveal">
+      <div class="gh-inner">
+        <div class="gh-title">🐙 <span>GitHub Pages</span> 시작하기</div>
+        <div class="gh-sub">가입부터 배포까지 5단계, 완전 무료!</div>
+        <div class="gh-steps">
+          <div class="gh-step"><div class="gh-step-num">1</div><div class="gh-step-txt"><strong>github.com</strong> 가입 → 새 저장소 만들기<br>이름은 <code>아이디.github.io</code> 형식으로!</div></div>
+          <div class="gh-step"><div class="gh-step-num">2</div><div class="gh-step-txt">이 <code>index.html</code>과 교육자료 HTML 파일들을 저장소에 업로드</div></div>
+          <div class="gh-step"><div class="gh-step-num">3</div><div class="gh-step-txt">Settings → Pages → Source를 <code>main</code> 브랜치로 설정</div></div>
+          <div class="gh-step"><div class="gh-step-num">4</div><div class="gh-step-txt">몇 분 뒤 <code>https://아이디.github.io</code> 로 접속하면 완성!</div></div>
+          <div class="gh-step"><div class="gh-step-num">5</div><div class="gh-step-txt">링크를 학생·학부모에게 공유 — 스마트폰에서 바로 접속 🎉</div></div>
+        </div>
+        <a href="https://github.com" target="_blank" class="gh-link">🐙 GitHub 바로가기 ↗</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section section-alt" id="contact">
+  <div class="section-inner">
+    <div class="eyebrow reveal">✦ CONTACT</div>
+    <h2 class="section-h reveal">함께 만들어요!</h2>
+    <p class="section-p reveal">자료 후기, 오류 신고, 제안 모두 환영해요 😊</p>
+    <div class="contact-grid">
+      <a href="#" class="contact-btn reveal"><span class="cb-ico">📋</span><div><div class="cb-title">네이버 밴드</div><div class="cb-sub">자료 업데이트 소식</div></div></a>
+      <a href="mailto:ubuntu3523@gmail.com" class="contact-btn reveal"><span class="cb-ico">📧</span><div><div class="cb-title">이메일</div><div class="cb-sub">ubuntu3523@gmail.com</div></div></a>
+      <a href="https://open.kakao.com/me/kobory" target="_blank" class="contact-btn reveal"><span class="cb-ico">💬</span><div><div class="cb-title">카카오 오픈채팅</div><div class="cb-sub">카카오 ID: kobory</div></div></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div><strong>✏️ 동환샘의 교육자료 나눔교실</strong></div>
+  <div>이동환 선생님이 만든 모든 자료는 교육 목적으로 무료 제공됩니다.</div>
+  <div style="margin-top:4px">© 2026 Lee Donghwan · <a href="https://github.com" target="_blank">GitHub Pages</a>로 운영 중</div>
+</footer>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-head">
+      <div>
+        <div style="font-size:11px;color:var(--ink3);margin-bottom:5px;letter-spacing:.08em;text-transform:uppercase" id="m-subject"></div>
+        <div style="font-size:20px;font-weight:700;font-family:'Jua',sans-serif" id="m-title"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="modal-desc" id="m-desc"></p>
+      <div class="modal-links" id="m-links"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 자료 추가 폼 모달 -->
+<div class="form-overlay" id="form-overlay" onclick="formOverlayClick(event)">
+  <div class="form-modal">
+    <div class="form-handle"></div>
+    <div class="form-head">
+      <div class="form-title" id="form-modal-title">자료 추가</div>
+      <button class="form-close" onclick="closeAddForm()">✕</button>
+    </div>
+    <div class="form-body">
+      <div class="form-group">
+        <label class="form-label">아이콘 <span>*</span></label>
+        <div class="emoji-row" id="emoji-row">
+          <span class="emoji-chip selected" data-v="📄">📄</span>
+          <span class="emoji-chip" data-v="🔬">🔬</span>
+          <span class="emoji-chip" data-v="🎨">🎨</span>
+          <span class="emoji-chip" data-v="🎮">🎮</span>
+          <span class="emoji-chip" data-v="🎵">🎵</span>
+          <span class="emoji-chip" data-v="📷">📷</span>
+          <span class="emoji-chip" data-v="🏃">🏃</span>
+          <span class="emoji-chip" data-v="🤖">🤖</span>
+          <span class="emoji-chip" data-v="💻">💻</span>
+          <span class="emoji-chip" data-v="🛠">🛠</span>
+          <span class="emoji-chip" data-v="📚">📚</span>
+          <span class="emoji-chip" data-v="🌱">🌱</span>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">카드 색상 <span>*</span></label>
+        <div class="color-row" id="color-row">
+          <div class="color-chip selected" data-v="#f0614a" style="background:#f0614a" title="코랄"></div>
+          <div class="color-chip" data-v="#3b82f6" style="background:#3b82f6" title="파랑"></div>
+          <div class="color-chip" data-v="#10b981" style="background:#10b981" title="초록"></div>
+          <div class="color-chip" data-v="#f59e0b" style="background:#f59e0b" title="노랑"></div>
+          <div class="color-chip" data-v="#8b5cf6" style="background:#8b5cf6" title="보라"></div>
+          <div class="color-chip" data-v="#ec4899" style="background:#ec4899" title="핑크"></div>
+          <div class="color-chip" data-v="#0ea5e9" style="background:#0ea5e9" title="하늘"></div>
+          <div class="color-chip" data-v="#10a37f" style="background:#10a37f" title="민트"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">자료 제목 <span>*</span></label>
+        <input class="form-input" id="f-title" type="text" placeholder="예: 5학년 전기 회로 실험">
+      </div>
+      <div class="form-group">
+        <label class="form-label">설명 <span>*</span></label>
+        <textarea class="form-textarea" id="f-desc" placeholder="자료에 대한 간단한 설명을 입력하세요."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">링크 URL <span>*</span></label>
+        <input class="form-input" id="f-url" type="text" placeholder="https://... 또는 파일명.html">
+        <span class="form-hint">외부 링크(https://...) 또는 같은 폴더의 HTML 파일명</span>
+      </div>
+      <div class="form-group">
+        <label class="form-label">태그 <span style="color:var(--ink3);font-weight:400">(선택, 쉼표로 구분)</span></label>
+        <input class="form-input" id="f-tags" type="text" placeholder="예: 실험, 5학년, 전기">
+      </div>
+      <div class="form-group">
+        <label class="form-label">분류 표시 <span style="color:var(--ink3);font-weight:400">(선택)</span></label>
+        <input class="form-input" id="f-badge" type="text" placeholder="예: SCIENCE, GPT, MAKER">
+      </div>
+      <button class="form-submit" onclick="submitCard()">✅ 카드 추가하기</button>
+    </div>
+  </div>
+</div>
+
+<!-- JSON 내보내기/가져오기 모달 -->
+<div class="form-overlay" id="json-overlay" onclick="if(event.target===this)closeJson()">
+  <div class="form-modal">
+    <div class="form-handle"></div>
+    <div class="form-head">
+      <div class="form-title">📦 JSON 저장 · 불러오기</div>
+      <button class="form-close" onclick="closeJson()">✕</button>
+    </div>
+    <div class="form-body">
+      <div style="background:var(--sky-l,#dbeafe);border-radius:12px;padding:14px 16px;font-size:13px;color:#1e40af;line-height:1.8;margin-bottom:4px">
+        <strong>📋 GitHub 영구 저장 방법</strong><br>
+        ① 아래 <b>JSON 다운로드</b> → <code style="background:rgba(0,0,0,.08);padding:1px 6px;border-radius:4px">cards.json</code> 파일 저장<br>
+        ② GitHub 저장소에 <b>업로드</b> (같은 폴더)<br>
+        ③ 다음번 사이트 접속 시 <b>JSON 가져오기</b>로 불러오기
+      </div>
+      <div class="form-group">
+        <label class="form-label">📤 JSON 내보내기</label>
+        <button class="form-submit" style="margin-top:0;background:var(--ink)" onclick="exportJson()">⬇️ cards.json 다운로드</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">📥 JSON 가져오기</label>
+        <span class="form-hint" style="margin-bottom:6px;display:block">GitHub에서 받은 cards.json 파일을 선택하세요</span>
+        <input type="file" id="json-file-input" accept=".json" style="display:none" onchange="importJson(event)">
+        <button class="form-submit" style="margin-top:0;background:#10b981" onclick="document.getElementById('json-file-input').click()">⬆️ cards.json 불러오기</button>
+      </div>
+      <div id="json-msg" style="font-size:13px;text-align:center;color:var(--mint,#10b981);font-weight:600;min-height:20px"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA={
+  body:{subject:'🌿 과학 · 5학년 4~8차시 통합',title:'우리 몸의 구조와 기능',desc:'소화·호흡·순환·배설·기관 협력 5개 차시를 하나의 파일에 담았어요. 상단 탭으로 차시를 이동하고, 각 차시마다 인터랙티브 탐험과 퀴즈까지 포함되어 있어요.',links:[{ico:'🚀',title:'통합 프로그램 열기',sub:'5개 차시 + 퀴즈 전부 포함',url:'우리몸의구조와기능_통합.html'}]},
+  gpt:{subject:'🤖 AI 도구 · ChatGPT Custom GPT',title:'에듀파인 물품구입 비서',desc:'에듀파인 업로드 엑셀 파일과 품의개요를 자동으로 작성해주는 GPT입니다. 견적서나 장바구니 내용(드래그 복사)을 입력하고 품의를 쉽게 끝내세요!',links:[{ico:'🤖',title:'에듀파인 물품구입 비서 열기',sub:'ChatGPT에서 바로 대화하기',url:'https://chatgpt.com/g/g-6a164db896a481918259a3ae14df937d-edyupain-mulpumguib-biseo'}]},
+};
+
+/* ─── 카드 데이터 (런타임, cards.json에서 불러오거나 임시 저장) ─── */
+let CARDS = {class:[], work:[], hobby:[]};
+
+/* ─── 모달 ─── */
+function openModal(k){
+  const d=DATA[k]; if(!d)return;
+  document.getElementById('m-subject').textContent=d.subject;
+  document.getElementById('m-title').textContent=d.title;
+  document.getElementById('m-desc').textContent=d.desc;
+  document.getElementById('m-links').innerHTML=d.links.map(l=>`<a class="mlink" href="${l.url}" target="_blank"><span class="mlink-ico">${l.ico}</span><div><div class="mlink-title">${l.title}</div><div class="mlink-sub">${l.sub}</div></div><span class="mlink-arr">↗</span></a>`).join('');
+  document.getElementById('overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');document.body.style.overflow='';}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal();}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeAddForm();closeJson();}});
+
+/* ─── 탭 전환 ─── */
+function switchTab(name,btn){
+  document.querySelectorAll('.cat-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  document.querySelectorAll('#tab-'+name+' .reveal:not(.in)').forEach((el,i)=>setTimeout(()=>el.classList.add('in'),i*60));
+}
+
+/* ─── 카드 렌더링 ─── */
+const bgMap={'#f0614a':'#fff3e0','#3b82f6':'#dbeafe','#10b981':'#d1fae5','#f59e0b':'#fef3c7','#8b5cf6':'#ede9fe','#ec4899':'#fce7f3','#0ea5e9':'#e0f2fe','#10a37f':'#e6f7f3'};
+
+function renderAllCards(){
+  ['class','work','hobby'].forEach(tab=>{
+    // 기존 동적 카드만 제거 (data-dynamic 속성)
+    document.querySelectorAll(`#grid-${tab} [data-dynamic]`).forEach(el=>el.remove());
+    CARDS[tab].forEach(card=>appendCardToGrid(tab,card));
+  });
+  updateCounts();
+}
+
+function appendCardToGrid(tab, card){
+  const grid = document.getElementById('grid-'+tab);
+  const empty = document.getElementById(tab+'-empty');
+  if(empty) empty.style.display='none';
+
+  const bg = bgMap[card.color]||'#f5f5f5';
+  const tagsHtml = (card.tags||[]).map(t=>`<span class="ctag">${t}</span>`).join('');
+  const badgeHtml = card.badge?`<span class="badge" style="background:${bg};color:var(--ink2)">${card.badge}</span>`:'';
+
+  const art = document.createElement('article');
+  art.className='mat-card in';
+  art.dataset.dynamic='1';
+  art.dataset.id=card.id;
+  art.style.cssText=`--card-accent:${card.color};position:relative`;
+  art.innerHTML=`
+    <button class="card-del" onclick="deleteCard('${tab}','${card.id}')" title="삭제">✕</button>
+    <div class="card-head">
+      <div class="card-icon-wrap" style="background:${bg}">${card.emoji}</div>
+      <div class="card-badges">${badgeHtml}</div>
+      <div class="card-title">${card.title}</div>
+      <div class="card-desc">${card.desc}</div>
+    </div>
+    <div class="card-tags">${tagsHtml}</div>
+    <div class="card-foot">
+      <span class="open-txt" onclick="window.open('${card.url}','_blank')">자료 열기 <span class="open-arrow">→</span></span>
+    </div>`;
+  grid.appendChild(art);
+}
+
+function deleteCard(tab, id){
+  if(!confirm('이 카드를 삭제할까요?')) return;
+  CARDS[tab] = CARDS[tab].filter(c=>c.id!==id);
+  document.querySelector(`[data-id="${id}"]`)?.remove();
+  updateCounts();
+  // 빈 카드 복원
+  const remaining = document.querySelectorAll(`#grid-${tab} .mat-card`).length;
+  if(remaining===0){const e=document.getElementById(tab+'-empty');if(e)e.style.display='flex';}
+  showJsonReminder();
+}
+
+function updateCounts(){
+  document.getElementById('cnt-class').textContent=document.querySelectorAll('#grid-class .mat-card').length;
+  document.getElementById('cnt-work').textContent=document.querySelectorAll('#grid-work .mat-card').length;
+  document.getElementById('cnt-hobby').textContent=document.querySelectorAll('#grid-hobby .mat-card').length;
+}
+
+/* ─── 추가 폼 ─── */
+let currentAddTab='class';
+const tabNames={class:'과학수업자료',work:'업무 도구',hobby:'취미생활'};
+
+function openAddForm(tab){
+  currentAddTab=tab;
+  document.getElementById('form-modal-title').textContent=`${tabNames[tab]}에 자료 추가`;
+  ['f-title','f-desc','f-url','f-tags','f-badge'].forEach(id=>document.getElementById(id).value='');
+  document.querySelectorAll('.emoji-chip').forEach((c,i)=>c.classList.toggle('selected',i===0));
+  document.querySelectorAll('.color-chip').forEach((c,i)=>c.classList.toggle('selected',i===0));
+  document.getElementById('form-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+}
+function closeAddForm(){document.getElementById('form-overlay').classList.remove('open');document.body.style.overflow='';}
+function formOverlayClick(e){if(e.target===document.getElementById('form-overlay'))closeAddForm();}
+
+document.getElementById('emoji-row').addEventListener('click',e=>{
+  const chip=e.target.closest('.emoji-chip');if(!chip)return;
+  document.querySelectorAll('.emoji-chip').forEach(c=>c.classList.remove('selected'));chip.classList.add('selected');
+});
+document.getElementById('color-row').addEventListener('click',e=>{
+  const chip=e.target.closest('.color-chip');if(!chip)return;
+  document.querySelectorAll('.color-chip').forEach(c=>c.classList.remove('selected'));chip.classList.add('selected');
+});
+
+function submitCard(){
+  const title=document.getElementById('f-title').value.trim();
+  const desc=document.getElementById('f-desc').value.trim();
+  const url=document.getElementById('f-url').value.trim();
+  if(!title||!desc||!url){alert('제목, 설명, 링크는 필수예요!');return;}
+  const card={
+    id:'c_'+Date.now(),
+    emoji:document.querySelector('.emoji-chip.selected')?.dataset.v||'📄',
+    color:document.querySelector('.color-chip.selected')?.dataset.v||'#f0614a',
+    title, desc, url,
+    tags:document.getElementById('f-tags').value.split(',').map(t=>t.trim()).filter(Boolean),
+    badge:document.getElementById('f-badge').value.trim()
+  };
+  CARDS[currentAddTab].push(card);
+  appendCardToGrid(currentAddTab, card);
+  updateCounts();
+  closeAddForm();
+  showJsonReminder();
+}
+
+/* ─── JSON 내보내기 / 가져오기 ─── */
+function showJsonReminder(){
+  // 저장 안내 배너 표시
+  let banner = document.getElementById('json-reminder');
+  if(!banner){
+    banner=document.createElement('div');
+    banner.id='json-reminder';
+    banner.style.cssText='position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:12px 24px;border-radius:50px;font-size:13px;font-weight:600;z-index:500;display:flex;align-items:center;gap:10px;box-shadow:0 4px 20px rgba(0,0,0,.25);cursor:pointer;white-space:nowrap';
+    banner.innerHTML='💾 변경사항이 있어요! <span style="color:#95d5b2">JSON 저장하기 →</span>';
+    banner.onclick=openJson;
+    document.body.appendChild(banner);
+  }
+  banner.style.display='flex';
+}
+
+function openJson(){
+  document.getElementById('json-overlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  document.getElementById('json-msg').textContent='';
+}
+function closeJson(){
+  document.getElementById('json-overlay').classList.remove('open');
+  document.body.style.overflow='';
+}
+
+function exportJson(){
+  const json=JSON.stringify(CARDS, null, 2);
+  const blob=new Blob([json],{type:'application/json'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='cards.json';
+  a.click();
+  document.getElementById('json-msg').textContent='✅ cards.json 다운로드 완료! GitHub에 업로드하세요.';
+  const banner=document.getElementById('json-reminder');
+  if(banner) banner.style.display='none';
+}
+
+function importJson(e){
+  const file=e.target.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const parsed=JSON.parse(ev.target.result);
+      if(parsed.class||parsed.work||parsed.hobby){
+        CARDS={class:parsed.class||[],work:parsed.work||[],hobby:parsed.hobby||[]};
+        renderAllCards();
+        document.getElementById('json-msg').textContent=`✅ 불러오기 완료! 총 ${CARDS.class.length+CARDS.work.length+CARDS.hobby.length}개 카드`;
+      } else { document.getElementById('json-msg').textContent='❌ 올바른 cards.json 파일이 아니에요.'; }
+    } catch(err){ document.getElementById('json-msg').textContent='❌ JSON 파싱 오류: '+err.message; }
+  };
+  reader.readAsText(file);
+  e.target.value='';
+}
+
+/* ─── cards.json 자동 로드 (GitHub Pages에서) ─── */
+fetch('cards.json')
+  .then(r=>{if(!r.ok)throw new Error('no file');return r.json();})
+  .then(data=>{
+    CARDS={class:data.class||[],work:data.work||[],hobby:data.hobby||[]};
+    renderAllCards();
+  })
+  .catch(()=>{ /* cards.json 없으면 빈 상태로 시작 */ updateCounts(); });
+
+/* ─── 초기화 ─── */
+function toggleNav(){document.getElementById('mnav').classList.toggle('show');}
+function closeMNav(){document.getElementById('mnav').classList.remove('show');}
+const io=new IntersectionObserver(entries=>{entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*70);io.unobserve(e.target);}});},{threshold:0.08});
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
