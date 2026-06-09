@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>롤링볼 챌린지 설계 시뮬레이터</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+  :root {
+    --bg: #0f0e0c;
+    --surface: #1a1915;
+    --surface2: #242219;
+    --border: #35332a;
+    --accent: #f0a500;
+    --accent2: #4ecdc4;
+    --accent3: #ff6b6b;
+    --lever-col: #a78bfa;
+    --push-col: #4ecdc4;
+    --text: #e8e4d8;
+    --muted: #8a8470;
+    --ball: #f0a500;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  header h1 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 18px;
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+  .badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+  .badge-lever { background: #3d2fa0; color: var(--lever-col); }
+  .badge-push  { background: #0e3d3a; color: var(--push-col); }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    padding: 6px 14px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 12px;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all .15s;
+  }
+  .btn:hover { background: var(--border); }
+  .btn-primary { background: var(--accent); color: #000; border-color: var(--accent); font-weight: 700; }
+  .btn-primary:hover { background: #d4920a; }
+  .btn-danger { background: #3a1515; border-color: var(--accent3); color: var(--accent3); }
+  .btn-danger:hover { background: #4a1c1c; }
+  .btn-run { background: #0a3a20; border-color: #22c55e; color: #22c55e; font-weight: 700; }
+  .btn-run:hover { background: #0f4a28; }
+  .btn-run.running { background: #3a1515; border-color: var(--accent3); color: var(--accent3); }
+
+  .ex-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 9px 14px; cursor: pointer;
+    transition: background .1s;
+    border-top: 1px solid var(--border);
+  }
+  .ex-item:hover { background: var(--surface2); }
+  .ex-icon { font-size: 20px; flex-shrink: 0; }
+  .ex-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .ex-desc  { font-size: 11px; color: var(--muted); margin-top: 1px; }
+
+  /* ── Main Layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+  }
+
+  /* ── Sidebar ── */
+  .sidebar {
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow-y: auto;
+  }
+  .sidebar-section {
+    padding: 14px 14px 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sidebar-section h3 {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+
+  .tool-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .tool-btn {
+    padding: 10px 6px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    font-size: 11px;
+    cursor: pointer;
+    text-align: center;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .tool-btn .icon { font-size: 20px; }
+  .tool-btn:hover { background: var(--border); border-color: var(--accent); }
+  .tool-btn.active { background: #2a2408; border-color: var(--accent); color: var(--accent); }
+  .tool-btn.active-lever { background: #1e1a3a; border-color: var(--lever-col); color: var(--lever-col); }
+  .tool-btn.active-push  { background: #0a2828; border-color: var(--push-col); color: var(--push-col); }
+
+  /* Props panel */
+  .prop-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+  .prop-row label { color: var(--muted); }
+  .prop-row input[type=range] {
+    width: 90px;
+    accent-color: var(--accent);
+  }
+  .prop-row input[type=number] {
+    width: 56px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .prop-row select {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 12px;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .color-dot {
+    width: 14px; height: 14px; border-radius: 50%;
+    display: inline-block; vertical-align: middle;
+  }
+
+  /* Stats */
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stat-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+  }
+  .stat-card .val { font-size: 18px; font-weight: 700; color: var(--accent); }
+  .stat-card .lbl { font-size: 10px; color: var(--muted); margin-top: 2px; }
+
+  /* Element list */
+  .elem-list { max-height: 160px; overflow-y: auto; }
+  .elem-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background .1s;
+  }
+  .elem-item:hover { background: var(--surface2); }
+  .elem-item.selected { background: var(--surface2); border-left: 2px solid var(--accent); padding-left: 6px; }
+  .elem-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .elem-del {
+    margin-left: auto;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 14px;
+    line-height: 1;
+    padding: 0 4px;
+  }
+  .elem-del:hover { color: var(--accent3); }
+
+  /* ── Canvas Area ── */
+  .canvas-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: -1px -1px;
+  }
+  canvas {
+    position: absolute;
+    top: 0; left: 0;
+    cursor: crosshair;
+  }
+  canvas.select-mode { cursor: default; }
+  canvas.move-mode   { cursor: move; }
+
+  .canvas-hint {
+    position: absolute;
+    bottom: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(10,9,7,.85);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 6px 16px;
+    font-size: 11px;
+    color: var(--muted);
+    pointer-events: none;
+    white-space: nowrap;
+  }
+
+  .sim-overlay {
+    position: absolute;
+    top: 14px; right: 14px;
+    background: rgba(10,9,7,.9);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 12px;
+    min-width: 130px;
+    display: none;
+  }
+  .sim-overlay.visible { display: block; }
+  .sim-overlay .time-val { font-size: 22px; font-weight: 700; color: var(--accent2); font-family: 'Black Han Sans'; }
+  .sim-overlay .speed-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-top: 6px;
+  }
+  .sim-overlay .speed-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width .1s;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎱 롤링볼 설계 시뮬레이터</h1>
+  <span class="badge badge-lever">지레</span>
+  <span class="badge badge-push">슬라이더</span>
+  <div class="header-actions">
+    <button class="btn" onclick="clearAll()">🗑 전체 삭제</button>
+    <div style="position:relative;display:inline-block" id="exampleMenuWrap">
+      <button class="btn" onclick="toggleExampleMenu()" id="exampleMenuBtn">📋 예시 불러오기 ▾</button>
+      <div id="exampleMenu" style="display:none;position:absolute;top:calc(100% + 6px);right:0;
+           background:var(--surface);border:1px solid var(--border);border-radius:8px;
+           min-width:220px;z-index:100;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+        <div style="padding:8px 12px 6px;font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase">예시 선택</div>
+        <div class="ex-item" onclick="loadExample(0)">
+          <span class="ex-icon">📐</span>
+          <div><div class="ex-title">경사로 코스</div><div class="ex-desc">경사로만 사용한 기본 코스</div></div>
+        </div>
+        <div class="ex-item" onclick="loadExample(1)">
+          <span class="ex-icon">⚖️</span>
+          <div><div class="ex-title">지레 코스</div><div class="ex-desc">지레로 공을 튕겨 보내는 코스</div></div>
+        </div>
+        <div class="ex-item" onclick="loadExample(2)">
+          <span class="ex-icon">➡️</span>
+          <div><div class="ex-title">밀고당기기 코스</div><div class="ex-desc">밀대·당기개를 활용한 코스</div></div>
+        </div>
+      </div>
+    </div>
+    <button class="btn btn-run" id="runBtn" onclick="toggleSim()">▶ 시뮬레이션 시작</button>
+  </div>
+</header>
+
+<div class="main">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+
+    <!-- 도구 선택 -->
+    <div class="sidebar-section">
+      <h3>구성 요소 추가</h3>
+      <div class="tool-grid">
+        <button class="tool-btn" id="tool-ramp"    onclick="setTool('ramp')"   title="경사로">
+          <span class="icon">📐</span>경사로
+        </button>
+        <button class="tool-btn" id="tool-lever"   onclick="setTool('lever')"  title="지레">
+          <span class="icon">⚖️</span>지레
+        </button>
+        <button class="tool-btn" id="tool-slider"  onclick="setTool('slider')" title="슬라이더 (밀고 빠지기)">
+          <span class="icon">🔩</span>슬라이더
+        </button>
+        <button class="tool-btn" id="tool-funnel"  onclick="setTool('funnel')" title="깔때기">
+          <span class="icon">🔻</span>깔때기
+        </button>
+        <button class="tool-btn" id="tool-wall"    onclick="setTool('wall')"   title="벽/막">
+          <span class="icon">🧱</span>벽
+        </button>
+        <button class="tool-btn" id="tool-goal"    onclick="setTool('goal')"   title="목표 지점">
+          <span class="icon">🏁</span>목표
+        </button>
+        <button class="tool-btn" id="tool-ballstart" onclick="setTool('ballstart')" title="공 시작 위치">
+          <span class="icon">🎱</span>공 위치
+        </button>
+        <button class="tool-btn" id="tool-select"  onclick="setTool('select')" title="선택/이동">
+          <span class="icon">🖱️</span>선택
+        </button>
+      </div>
+    </div>
+
+    <!-- 속성 -->
+    <div class="sidebar-section" id="propsPanel">
+      <h3>속성</h3>
+      <div id="propsContent">
+        <div style="color:var(--muted);font-size:12px">요소를 선택하거나<br>추가하면 속성이 표시됩니다.</div>
+      </div>
+    </div>
+
+    <!-- 통계 -->
+    <div class="sidebar-section">
+      <h3>설계 정보</h3>
+      <div class="stat-grid">
+        <div class="stat-card"><div class="val" id="stat-elems">0</div><div class="lbl">구성 요소</div></div>
+        <div class="stat-card"><div class="val" id="stat-levers">0</div><div class="lbl">지레 수</div></div>
+        <div class="stat-card"><div class="val" id="stat-pushpull">0</div><div class="lbl">밀고당기기</div></div>
+        <div class="stat-card"><div class="val" id="stat-ramps">0</div><div class="lbl">경사로</div></div>
+      </div>
+    </div>
+
+    <!-- 요소 목록 -->
+    <div class="sidebar-section">
+      <h3>요소 목록</h3>
+      <div class="elem-list" id="elemList"></div>
+    </div>
+
+    <!-- 시뮬 설정 -->
+    <div class="sidebar-section">
+      <h3>시뮬레이션 설정</h3>
+      <div class="prop-row">
+        <label>중력</label>
+        <input type="range" min="0.1" max="1.5" step="0.1" value="0.5" id="gravitySlider" oninput="gravity=+this.value;document.getElementById('gravityVal').textContent=this.value">
+        <span id="gravityVal" style="font-size:11px;color:var(--muted);min-width:24px">0.5</span>
+      </div>
+      <div class="prop-row">
+        <label>공 크기</label>
+        <input type="range" min="6" max="20" step="1" value="10" id="ballSizeSlider" oninput="ballRadius=+this.value;document.getElementById('ballSizeVal').textContent=this.value">
+        <span id="ballSizeVal" style="font-size:11px;color:var(--muted);min-width:24px">10</span>
+      </div>
+      <div class="prop-row">
+        <label>공 시작 X</label>
+        <input type="number" id="ballStartX" value="60" style="width:56px" onchange="ballStartPos.x=+this.value;drawAll()">
+      </div>
+      <div class="prop-row">
+        <label>공 시작 Y</label>
+        <input type="number" id="ballStartY" value="60" style="width:56px" onchange="ballStartPos.y=+this.value;drawAll()">
+      </div>
+      <div style="font-size:10px;color:var(--muted);margin-top:2px">🎱 도구로 캔버스 클릭해서 배치 가능</div>
+    </div>
+  </div>
+
+  <!-- CANVAS -->
+  <div class="canvas-wrap" id="canvasWrap">
+    <canvas id="mainCanvas"></canvas>
+    <div class="canvas-hint" id="hint">📐 경사로를 선택하고 캔버스를 클릭·드래그하여 추가하세요</div>
+    <div class="sim-overlay" id="simOverlay">
+      <div style="color:var(--muted);font-size:10px;margin-bottom:2px">시뮬레이션 시간</div>
+      <div class="time-val" id="simTime">0.0s</div>
+      <div style="color:var(--muted);font-size:10px;margin:6px 0 2px">공 속도</div>
+      <div class="speed-bar"><div class="speed-fill" id="speedFill" style="width:0%"></div></div>
+      <div style="font-size:10px;color:var(--muted);margin-top:3px" id="speedVal">0 px/s</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──────────────────────────────────────────────
+const canvas = document.getElementById('mainCanvas');
+const ctx = canvas.getContext('2d');
+const wrap  = document.getElementById('canvasWrap');
+
+let W, H;
+function resize() {
+  W = wrap.clientWidth;
+  H = wrap.clientHeight;
+  canvas.width  = W;
+  canvas.height = H;
+  if (typeof drawAll === 'function') drawAll();
+}
+window.addEventListener('resize', resize);
+
+let tool = 'select';
+let elements = [];
+let ballStartPos = { x: 60, y: 60 };
+let selected = null;
+let dragging = false;
+let dragStart = null;
+let drawStart = null;
+let idCounter = 0;
+
+// Sim state
+let simRunning = false;
+let simBall = null;
+let animId = null;
+let gravity = 0.5;
+let ballRadius = 10;
+let simTime = 0;
+let lastTimestamp = null;
+
+// ── Color map ──────────────────────────────────────────
+const COLORS = {
+  ramp:   '#6c9e5e',
+  lever:  '#a78bfa',
+  slider: '#4ecdc4',
+  funnel: '#60a5fa',
+  wall:   '#94a3b8',
+  goal:   '#f0a500',
+};
+const LABELS = {
+  ramp:'경사로', lever:'지레', slider:'슬라이더', funnel:'깔때기', wall:'벽', goal:'목표'
+};
+
+// ── Tool selection ─────────────────────────────────────
+function setTool(t) {
+  tool = t;
+  document.querySelectorAll('.tool-btn').forEach(b => b.className = 'tool-btn');
+  const btn = document.getElementById('tool-' + t);
+  if (btn) {
+    if (t === 'lever') btn.classList.add('active-lever');
+    else if (t === 'slider') btn.classList.add('active-push');
+    else btn.classList.add('active');
+  }
+  const hints = {
+    ramp:      '클릭·드래그로 경사로 시작·끝점을 지정하세요',
+    lever:     '클릭·드래그로 지레를 배치하세요 (받침점 자동 계산)',
+    slider:    '경사로 위에 클릭해서 슬라이더를 배치하세요 — 구슬A가 부딪히면 B를 밀어냅니다',
+    funnel:    '클릭으로 깔때기 위치를 지정하세요',
+    wall:      '클릭·드래그로 벽을 그리세요',
+    goal:      '클릭으로 목표 지점을 지정하세요',
+    ballstart: '캔버스를 클릭해서 공 시작 위치를 지정하세요',
+    select:    '요소를 클릭하여 선택 후 드래그로 이동 / Delete로 삭제',
+  };
+  document.getElementById('hint').textContent = '💡 ' + (hints[t] || '');
+  canvas.className = t === 'select' ? 'select-mode' : '';
+  if (t !== 'select') selected = null;
+  renderPropsPanel();
+  drawAll();
+}
+
+// ── Mouse ──────────────────────────────────────────────
+let preview = null;
+
+// 드래그로 새 요소 그리는 중인지 (기존 객체 위에서 시작하지 않은 경우)
+let drawingNew = false;
+
+canvas.addEventListener('mousedown', e => {
+  if (simRunning) return;
+  const {x, y} = pos(e);
+
+  // 어떤 도구든 기존 객체 위를 클릭했으면 선택 우선
+  const hit = hitTest(x, y);
+  if (hit && tool !== 'ballstart') {
+    selected = hit;
+    dragging = true;
+    drawingNew = false;
+    dragStart = {x, y, ox: hit.x, oy: hit.y,
+                  x2: hit.x2 !== undefined ? hit.x2 : 0,
+                  y2: hit.y2 !== undefined ? hit.y2 : 0};
+    renderPropsPanel();
+    renderElemList();
+    drawAll();
+    return;
+  }
+
+  // 빈 공간 클릭 → 도구에 따라 새 요소 그리기 시작
+  drawingNew = true;
+  if (['ramp','lever','wall'].includes(tool)) {
+    drawStart = {x, y};
+  }
+  // select 도구로 빈 공간 클릭 → 선택 해제
+  if (tool === 'select') {
+    selected = null;
+    dragging = false;
+    renderPropsPanel();
+    renderElemList();
+  }
+  drawAll();
+});
+
+canvas.addEventListener('mousemove', e => {
+  if (simRunning) return;
+  const {x, y} = pos(e);
+
+  // 선택된 객체 드래그 이동
+  if (dragging && selected && !drawingNew) {
+    const dx = x - dragStart.x, dy = y - dragStart.y;
+    selected.x = dragStart.ox + dx;
+    selected.y = dragStart.oy + dy;
+    if (selected.x2 !== undefined) { selected.x2 = dragStart.x2 + dx; selected.y2 = dragStart.y2 + dy; }
+    drawAll();
+    return;
+  }
+
+  // 새 요소 드래그 미리보기
+  if (drawingNew && drawStart && ['ramp','lever','wall'].includes(tool)) {
+    preview = {x: drawStart.x, y: drawStart.y, x2: x, y2: y};
+    drawAll();
+  }
+});
+
+canvas.addEventListener('mouseup', e => {
+  if (simRunning) return;
+  const {x, y} = pos(e);
+
+  if (dragging && !drawingNew) {
+    // 드래그 이동 완료
+    dragging = false;
+    drawAll();
+    return;
+  }
+
+  dragging = false;
+
+  if (drawingNew) {
+    if (['ramp','lever','wall'].includes(tool) && drawStart) {
+      const dx = x - drawStart.x, dy = y - drawStart.y;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        addElement(tool, drawStart.x, drawStart.y, x, y);
+      }
+      drawStart = null;
+      preview = null;
+    } else if (['slider','funnel','goal'].includes(tool)) {
+      addElement(tool, x, y);
+    } else if (tool === 'ballstart') {
+      ballStartPos = { x: Math.round(x), y: Math.round(y) };
+      document.getElementById('ballStartX').value = ballStartPos.x;
+      document.getElementById('ballStartY').value = ballStartPos.y;
+    }
+    drawingNew = false;
+  }
+
+  updateStats();
+  renderElemList();
+  drawAll();
+});
+
+canvas.addEventListener('mouseleave', () => {
+  if (!simRunning) { dragging = false; drawStart = null; preview = null; drawAll(); }
+});
+
+// Delete / Backspace 키로 선택 요소 삭제
+document.addEventListener('keydown', e => {
+  if (simRunning) return;
+  if ((e.key === 'Delete' || e.key === 'Backspace') && selected) {
+    // 입력 필드에 포커스 중이면 무시
+    const tag = document.activeElement.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    deleteSelected();
+  }
+});
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function hitTest(x, y) {
+  for (let i = elements.length - 1; i >= 0; i--) {
+    const el = elements[i];
+    if (el.type === 'ramp' || el.type === 'wall') {
+      if (distToSeg(x, y, el.x, el.y, el.x2, el.y2) < 12) return el;
+    } else if (el.type === 'lever') {
+      // 현재 회전 상태의 실제 끝점으로 히트 테스트
+      const bLen = Math.hypot(el.x2-el.x, el.y2-el.y);
+      const bAng = Math.atan2(el.y2-el.y, el.x2-el.x);
+      const pvX = el.x+(el.x2-el.x)*el.pivotRatio, pvY = el.y+(el.y2-el.y)*el.pivotRatio;
+      const ta = bAng+(el._angle||0);
+      const llx=pvX-Math.cos(ta)*bLen*el.pivotRatio, lly=pvY-Math.sin(ta)*bLen*el.pivotRatio;
+      const lrx=pvX+Math.cos(ta)*bLen*(1-el.pivotRatio), lry=pvY+Math.sin(ta)*bLen*(1-el.pivotRatio);
+      if (distToSeg(x, y, llx, lly, lrx, lry) < 14) return el;
+    } else if (el.type === 'slider') {
+      const linked = el.linkedRampId ? elements.find(e=>e.id===el.linkedRampId) : null;
+      let sx, sy;
+      if (linked) {
+        const rdx=linked.x2-linked.x, rdy=linked.y2-linked.y, rL=Math.hypot(rdx,rdy);
+        const p = (el._pos!==undefined ? el._pos : el.offset*rL);
+        sx = linked.x + (rdx/rL)*p; sy = linked.y + (rdy/rL)*p;
+      } else { sx=el.x; sy=el.y; }
+      const dx=x-sx, dy=y-sy;
+      if (dx*dx+dy*dy < 900) return el;
+    } else {
+      const dx = x - el.x, dy = y - el.y;
+      if (dx*dx + dy*dy < 600) return el;
+    }
+  }
+  return null;
+}
+
+function distToSeg(px, py, ax, ay, bx, by) {
+  const dx = bx-ax, dy = by-ay;
+  const t = Math.max(0, Math.min(1, ((px-ax)*dx+(py-ay)*dy)/(dx*dx+dy*dy)));
+  const nx = ax+t*dx-px, ny = ay+t*dy-py;
+  return Math.sqrt(nx*nx+ny*ny);
+}
+
+// ── Add Element ─────────────────────────────────────────
+function addElement(type, x, y, x2, y2) {
+  const el = {
+    id: ++idCounter,
+    type,
+    x, y,
+    label: LABELS[type] + ' ' + idCounter,
+  };
+  if (x2 !== undefined) { el.x2 = x2; el.y2 = y2; }
+
+  // defaults
+  if (type === 'lever') {
+    el.pivotRatio  = 0.4;   // 받침점 위치 비율 (0=왼끝, 1=오른끝)
+    el.restAngle   = 0;     // 초기 기울기 (rad, 드래그로 결정)
+    el._angle      = 0;     // 시뮬 런타임 현재 회전각 (받침점 기준)
+    el._omega      = 0;     // 각속도 (rad/s)
+    el.maxAngle    = 0.55;  // 최대 회전 제한 (rad, ~31도)
+    el.inertia     = 1.0;   // 관성 계수 (클수록 느리게 회전)
+  }
+  if (type === 'slider') {
+    // 슬라이더: 연결된 경사로 방향으로 이동, sliderOffset=경사로 위 위치(px)
+    el.linkedRampId = null;  // 연결된 경사로 id
+    el.offset = 0.5;         // 경사로 위 위치 비율 (0~1)
+    el.width  = 40;          // 슬라이더 폭(px)
+    el.height = 14;          // 슬라이더 높이(px)
+    // 시뮬 상태
+    el._pos    = 0;          // 런타임 오프셋(px), 경사로 시작에서
+    el._vel    = 0;          // 경사로 방향 속도
+    el._active = false;
+  }
+  if (type === 'ramp')  { el.friction = 0.98; }
+  if (type === 'funnel'){ el.width = 60; }
+  if (type === 'wall')  { el.bounce = 0.5; }
+
+  elements.push(el);
+  selected = el;
+  renderPropsPanel();
+}
+
+// ── Draw ───────────────────────────────────────────────
+function drawAll() {
+  ctx.clearRect(0, 0, W, H);
+
+  // grid already handled by CSS background
+
+  // elements
+  elements.forEach(el => drawElement(el, el === selected));
+
+  // preview line
+  if (preview) {
+    ctx.save();
+    ctx.globalAlpha = 0.5;
+    ctx.strokeStyle = COLORS[tool] || '#fff';
+    ctx.lineWidth = tool === 'lever' ? 6 : 3;
+    ctx.setLineDash([6, 4]);
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(preview.x, preview.y);
+    ctx.lineTo(preview.x2, preview.y2);
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.restore();
+  }
+
+  // sim ball
+  if (simBall) drawBall(simBall);
+
+  // ball start marker (시뮬 중이 아닐 때)
+  if (!simBall) drawBallStartMarker();
+
+  // 빈 화면 안내
+  if (!simBall && elements.length === 0) {
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'rgba(138,132,112,0.5)';
+    ctx.font = '500 22px Noto Sans KR, sans-serif';
+    ctx.fillText('왼쪽 도구로 요소를 추가하거나', W/2, H/2 - 22);
+    ctx.fillText('📋 예시 불러오기로 시작해보세요', W/2, H/2 + 14);
+    ctx.font = '13px Noto Sans KR, sans-serif';
+    ctx.fillStyle = 'rgba(138,132,112,0.3)';
+    ctx.fillText('경사로 / 지레 / 밀고당기기 예시 중 선택할 수 있어요', W/2, H/2 + 46);
+    ctx.restore();
+  }
+}
+
+function drawElement(el, sel) {
+  ctx.save();
+  const col = COLORS[el.type] || '#888';
+
+  if (sel) {
+    ctx.shadowColor = col;
+    ctx.shadowBlur = 10;
+  }
+
+  switch (el.type) {
+    case 'ramp': {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = sel ? 4 : 3;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(el.x, el.y); ctx.lineTo(el.x2, el.y2); ctx.stroke();
+      // end-caps
+      ctx.fillStyle = col;
+      ctx.beginPath(); ctx.arc(el.x, el.y, 4, 0, Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.arc(el.x2, el.y2, 4, 0, Math.PI*2); ctx.fill();
+      break;
+    }
+    case 'lever': {
+      // 받침점 월드 좌표 (드래그로 정의된 x,y,x2,y2 기준)
+      const baseLen = Math.hypot(el.x2-el.x, el.y2-el.y);
+      const baseAngle = Math.atan2(el.y2-el.y, el.x2-el.x);
+      const pvX = el.x + (el.x2-el.x)*el.pivotRatio;
+      const pvY = el.y + (el.y2-el.y)*el.pivotRatio;
+
+      // 런타임 회전각 (시뮬 중엔 _angle, 아니면 restAngle)
+      const rot = (simRunning || el._angle) ? (el._angle||0) : (el.restAngle||0);
+      const totalAngle = baseAngle + rot;
+
+      // 회전된 끝점들
+      const leftLen  = baseLen * el.pivotRatio;
+      const rightLen = baseLen * (1 - el.pivotRatio);
+      const lx = pvX - Math.cos(totalAngle) * leftLen;
+      const ly = pvY - Math.sin(totalAngle) * leftLen;
+      const rx = pvX + Math.cos(totalAngle) * rightLen;
+      const ry = pvY + Math.sin(totalAngle) * rightLen;
+
+      ctx.save();
+      // 지레 막대 (두꺼운 선)
+      ctx.strokeStyle = col;
+      ctx.lineWidth = sel ? 8 : 7;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(rx, ry); ctx.stroke();
+      // 하이라이트
+      ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+      ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(rx, ry); ctx.stroke();
+
+      // ── 받침점 (삼각형 + 원) ──
+      ctx.fillStyle = '#22c55e';
+      ctx.strokeStyle = '#0a1a0a';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(pvX, pvY);
+      ctx.lineTo(pvX - 13, pvY + 20);
+      ctx.lineTo(pvX + 13, pvY + 20);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = '#22c55e';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(pvX, pvY, 7, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+
+      // ── 힘점 (왼쪽 끝, 빨간 화살표 + 레이블) ──
+      ctx.fillStyle = '#ff6b6b';
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(lx, ly, 6, 0, Math.PI*2); ctx.fill();
+      // 아래쪽 화살표
+      ctx.beginPath();
+      ctx.moveTo(lx, ly - 22);
+      ctx.lineTo(lx, ly - 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(lx-5, ly-12); ctx.lineTo(lx, ly-6); ctx.lineTo(lx+5, ly-12);
+      ctx.stroke();
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = 'bold 10px Noto Sans KR';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'bottom';
+      ctx.fillText('힘점', lx, ly - 24);
+      ctx.textBaseline = 'alphabetic';
+
+      // ── 작용점 (오른쪽 끝, 파란 화살표 + 레이블) ──
+      ctx.fillStyle = '#60a5fa';
+      ctx.strokeStyle = '#60a5fa';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(rx, ry, 6, 0, Math.PI*2); ctx.fill();
+      // 위쪽 화살표
+      ctx.beginPath();
+      ctx.moveTo(rx, ry + 22);
+      ctx.lineTo(rx, ry + 6);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(rx-5, ry+12); ctx.lineTo(rx, ry+6); ctx.lineTo(rx+5, ry+12);
+      ctx.stroke();
+      ctx.fillStyle = '#60a5fa';
+      ctx.font = 'bold 10px Noto Sans KR';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('작용점', rx, ry + 24);
+      ctx.textBaseline = 'alphabetic';
+
+      // ── 받침점 라벨 ──
+      ctx.fillStyle = '#22c55e';
+      ctx.font = 'bold 10px Noto Sans KR';
+      ctx.textAlign = 'center';
+      ctx.fillText('받침점', pvX, pvY + 34);
+
+      // 선택 핸들
+      if (sel) {
+        [[lx,ly],[rx,ry]].forEach(([hx,hy]) => {
+          ctx.fillStyle = '#fff'; ctx.strokeStyle = col; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+        });
+      }
+      ctx.restore();
+      break;
+    }
+    case 'slider': {
+      // 연결된 경사로 찾아서 그 위에 그리기
+      const linked = el.linkedRampId ? elements.find(e=>e.id===el.linkedRampId) : null;
+      let sx, sy, angle;
+      if (linked) {
+        const dx = linked.x2 - linked.x, dy = linked.y2 - linked.y;
+        const L = Math.hypot(dx, dy);
+        angle = Math.atan2(dy, dx);
+        const pos = el._active !== undefined ? el._pos : (el.offset * L);
+        sx = linked.x + (dx/L)*pos;
+        sy = linked.y + (dy/L)*pos;
+      } else {
+        sx = el.x; sy = el.y; angle = 0;
+      }
+      const w = el.width || 40, h = el.height || 14;
+      ctx.save();
+      ctx.translate(sx, sy);
+      ctx.rotate(angle);
+      // 슬라이더 본체 (경사로 위에 얹힌 블록)
+      ctx.fillStyle = sel ? col : 'rgba(78,205,196,0.85)';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = sel ? 2 : 1.5;
+      ctx.beginPath();
+      ctx.roundRect(-w/2, -(h + 5), w, h, 4);
+      ctx.fill(); ctx.stroke();
+      // 슬라이더 안 화살표
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 11px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('▶▶', 0, -(h/2 + 5));
+      ctx.textBaseline = 'alphabetic';
+      // 바퀴 점 2개
+      [-w/3, w/3].forEach(ox => {
+        ctx.beginPath();
+        ctx.arc(ox, -3, 3, 0, Math.PI*2);
+        ctx.fillStyle = '#0a2828';
+        ctx.fill();
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      });
+      ctx.restore();
+      // 연결선 (배치 전 경사로 미연결 시 위치 표시)
+      if (!linked) {
+        ctx.save();
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4,3]);
+        ctx.strokeRect(sx - (w/2), sy - (h+5), w, h);
+        ctx.setLineDash([]);
+        ctx.fillStyle = col;
+        ctx.font = '10px Noto Sans KR';
+        ctx.textAlign = 'center';
+        ctx.fillText('슬라이더 — 경사로 클릭으로 연결', sx, sy + 10);
+        ctx.restore();
+      }
+      break;
+    }
+    case 'funnel': {
+      const hw = (el.width||60) / 2;
+      ctx.fillStyle = 'rgba(96,165,250,0.15)';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = sel ? 3 : 2;
+      ctx.beginPath();
+      ctx.moveTo(el.x - hw, el.y - 20);
+      ctx.lineTo(el.x + hw, el.y - 20);
+      ctx.lineTo(el.x + 12, el.y + 20);
+      ctx.lineTo(el.x - 12, el.y + 20);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+      ctx.fillStyle = col;
+      ctx.font = '10px Noto Sans KR';
+      ctx.textAlign = 'center';
+      ctx.fillText('깔때기', el.x, el.y + 34);
+      break;
+    }
+    case 'wall': {
+      ctx.strokeStyle = col;
+      ctx.lineWidth = sel ? 8 : 6;
+      ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(el.x, el.y); ctx.lineTo(el.x2, el.y2); ctx.stroke();
+      // brick pattern
+      ctx.strokeStyle = 'rgba(0,0,0,0.3)';
+      ctx.lineWidth = 1;
+      const len = Math.hypot(el.x2-el.x, el.y2-el.y);
+      const steps = Math.floor(len / 14);
+      for (let i = 1; i < steps; i++) {
+        const t = i / steps;
+        const bx = el.x + (el.x2-el.x)*t, by = el.y + (el.y2-el.y)*t;
+        ctx.beginPath(); ctx.moveTo(bx, by - 3); ctx.lineTo(bx, by + 3); ctx.stroke();
+      }
+      break;
+    }
+    case 'goal': {
+      // checkered flag
+      const sz = 28;
+      ctx.fillStyle = 'rgba(240,165,0,0.15)';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = sel ? 3 : 2;
+      ctx.beginPath();
+      ctx.arc(el.x, el.y, sz, 0, Math.PI*2);
+      ctx.fill(); ctx.stroke();
+      ctx.font = '22px sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🏁', el.x, el.y);
+      ctx.textBaseline = 'alphabetic';
+      // glow ring
+      if (sel) {
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 2;
+        ctx.globalAlpha = 0.4;
+        ctx.beginPath(); ctx.arc(el.x, el.y, sz + 8, 0, Math.PI*2); ctx.stroke();
+      }
+      break;
+    }
+  }
+
+  // selection handles — ramp/wall만 (lever는 drawElement 내부에서 처리)
+  if (sel && (el.type === 'ramp' || el.type === 'wall')) {
+    [[el.x,el.y],[el.x2,el.y2]].forEach(([hx,hy]) => {
+      ctx.fillStyle = '#fff';
+      ctx.strokeStyle = col;
+      ctx.lineWidth = 2;
+      ctx.shadowBlur = 0;
+      ctx.beginPath(); ctx.arc(hx, hy, 6, 0, Math.PI*2); ctx.fill(); ctx.stroke();
+    });
+  }
+
+  ctx.restore();
+}
+
+function drawBall(b) {
+  ctx.save();
+  // trail
+  if (b.trail) {
+    b.trail.forEach((p, i) => {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, ballRadius * 0.5, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(240,165,0,${i/b.trail.length * 0.3})`;
+      ctx.fill();
+    });
+  }
+  // shadow
+  ctx.beginPath();
+  ctx.ellipse(b.x, b.y + ballRadius - 2, ballRadius * 0.8, 3, 0, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(0,0,0,0.4)';
+  ctx.fill();
+  // ball
+  ctx.beginPath();
+  ctx.arc(b.x, b.y, ballRadius, 0, Math.PI*2);
+  ctx.fillStyle = '#f0a500';
+  ctx.fill();
+  ctx.strokeStyle = '#d4920a';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // shine
+  ctx.beginPath();
+  ctx.arc(b.x - ballRadius*0.28, b.y - ballRadius*0.28, ballRadius*0.22, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawBallStartMarker() {
+  const x = ballStartPos.x, y = ballStartPos.y;
+  const r = ballRadius;
+  const isActive = tool === 'ballstart';
+  ctx.save();
+  // 외곽 점선 원
+  ctx.beginPath();
+  ctx.arc(x, y, r + 6, 0, Math.PI*2);
+  ctx.strokeStyle = isActive ? '#f0a500' : 'rgba(240,165,0,0.4)';
+  ctx.lineWidth = isActive ? 2 : 1;
+  ctx.setLineDash([4, 3]);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  // 공 본체 (반투명)
+  ctx.beginPath();
+  ctx.arc(x, y, r, 0, Math.PI*2);
+  ctx.fillStyle = isActive ? 'rgba(240,165,0,0.7)' : 'rgba(240,165,0,0.3)';
+  ctx.fill();
+  ctx.strokeStyle = isActive ? '#f0a500' : 'rgba(240,165,0,0.5)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+  // 라벨
+  ctx.font = '10px Noto Sans KR, sans-serif';
+  ctx.fillStyle = isActive ? '#f0a500' : 'rgba(240,165,0,0.6)';
+  ctx.textAlign = 'center';
+  ctx.fillText('시작', x, y - r - 10);
+  ctx.restore();
+}
+
+// ── Simulation ─────────────────────────────────────────
+function toggleSim() {
+  if (simRunning) stopSim();
+  else startSim();
+}
+
+function startSim() {
+  const bx = ballStartPos.x;
+  const by = ballStartPos.y;
+  // 시뮬 상태 초기화
+  elements.forEach(el => {
+    if (el.type === 'slider') {
+      const linked = el.linkedRampId ? elements.find(e=>e.id===el.linkedRampId) : null;
+      const rL = linked ? Math.hypot(linked.x2-linked.x, linked.y2-linked.y) : 200;
+      el._pos = el.offset * rL;
+      el._vel = 0;
+    }
+    if (el.type === 'lever') {
+      el._angle = el.restAngle || 0;
+      el._omega = 0;
+    }
+  });
+  simBall = { x: bx, y: by, vx: 0, vy: 0, trail: [], onElement: null };
+  simRunning = true;
+  simTime = 0;
+  lastTimestamp = null;
+  document.getElementById('runBtn').textContent = '⏹ 중지';
+  document.getElementById('runBtn').classList.add('running');
+  document.getElementById('simOverlay').classList.add('visible');
+  animId = requestAnimationFrame(simLoop);
+}
+
+function stopSim() {
+  simRunning = false;
+  simBall = null;
+  if (animId) cancelAnimationFrame(animId);
+  document.getElementById('runBtn').textContent = '▶ 시뮬레이션 시작';
+  document.getElementById('runBtn').classList.remove('running');
+  document.getElementById('simOverlay').classList.remove('visible');
+  drawAll();
+}
+
+function simLoop(ts) {
+  if (!simRunning) return;
+  if (!lastTimestamp) lastTimestamp = ts;
+  const dt = Math.min((ts - lastTimestamp) / 16.67, 3); // normalize to ~60fps
+  lastTimestamp = ts;
+  simTime += dt / 60;
+
+  // physics steps
+  const steps = 3;
+  for (let s = 0; s < steps; s++) {
+    stepBall(dt / steps);
+  }
+
+  // update UI
+  document.getElementById('simTime').textContent = simTime.toFixed(1) + 's';
+  const spd = Math.sqrt(simBall.vx**2 + simBall.vy**2);
+  const pct = Math.min(spd / 15 * 100, 100);
+  document.getElementById('speedFill').style.width = pct + '%';
+  document.getElementById('speedVal').textContent = Math.round(spd * 10) + ' px/s';
+
+  drawAll();
+
+  // out of bounds check
+  if (simBall.x < -50 || simBall.x > W+50 || simBall.y > H + 100) {
+    stopSim();
+    return;
+  }
+
+  // goal check
+  const goal = elements.find(e => e.type === 'goal');
+  if (goal) {
+    const dx = simBall.x - goal.x, dy = simBall.y - goal.y;
+    if (dx*dx + dy*dy < 1200) {
+      setTimeout(() => { alert('🎉 목표 도달! 시간: ' + simTime.toFixed(2) + '초'); stopSim(); }, 50);
+      return;
+    }
+  }
+
+  animId = requestAnimationFrame(simLoop);
+}
+
+function stepBall(dt) {
+  const b = simBall;
+  b.vy += gravity * dt;
+
+  let onSurface = false;
+
+  // collision with each element
+  for (const el of elements) {
+    if (el.type === 'ramp' || el.type === 'wall') {
+      const result = segCollide(b.x, b.y, b.vx, b.vy, el.x, el.y, el.x2, el.y2, ballRadius);
+      if (result) {
+        b.x = result.nx; b.y = result.ny;
+        b.vx = result.nvx; b.vy = result.nvy;
+        onSurface = true;
+        if (el.type === 'ramp')  b.vx *= (el.friction || 0.98);
+        if (el.type === 'wall') { b.vx *= (el.bounce||0.5); b.vy *= (el.bounce||0.5); }
+      }
+    }
+
+    // ── 지레 회전 물리 ────────────────────────────────
+    if (el.type === 'lever') {
+      const baseLen   = Math.hypot(el.x2-el.x, el.y2-el.y);
+      const baseAngle = Math.atan2(el.y2-el.y, el.x2-el.x);
+      const pvX = el.x + (el.x2-el.x)*el.pivotRatio;
+      const pvY = el.y + (el.y2-el.y)*el.pivotRatio;
+      if (el._angle === undefined) el._angle = el.restAngle || 0;
+      if (el._omega === undefined) el._omega = 0;
+
+      const totalAngle = baseAngle + el._angle;
+      const cosTa = Math.cos(totalAngle), sinTa = Math.sin(totalAngle);
+      const levDx = cosTa, levDy = sinTa;        // 지레 방향
+      const levNx = -sinTa, levNy = cosTa;       // 법선 (위쪽)
+      const leftLen  = baseLen * el.pivotRatio;
+      const rightLen = baseLen * (1 - el.pivotRatio);
+      const lx = pvX - levDx*leftLen,  ly = pvY - levDy*leftLen;
+      const rx = pvX + levDx*rightLen, ry = pvY + levDy*rightLen;
+
+      const result = segCollide(b.x, b.y, b.vx, b.vy, lx, ly, rx, ry, ballRadius);
+      if (result) {
+        b.x = result.nx; b.y = result.ny;
+        onSurface = true;
+
+        const hitX = b.x - pvX, hitY = b.y - pvY;
+        const armLen = Math.max(Math.hypot(hitX, hitY), 1);
+        // 힘점(왼쪽)=sideSign<0, 작용점(오른쪽)=sideSign>0
+        const sideSign = hitX*levDx + hitY*levDy;
+        // 공의 법선 방향 속도 (지레 면을 누르는 속도)
+        const vNorm = b.vx*levNx + b.vy*levNy;  // 음수=눌림
+
+        const I = (el.inertia||1.0) * baseLen * baseLen * 0.08;
+        // 힘점 눌리면 시계방향(angle+), 작용점 눌리면 반시계(angle-)
+        const torque = (-vNorm * 2.0) * armLen * (sideSign < 0 ? 1 : -1);
+        el._omega += torque / I * dt;
+
+        // 지레 접촉점의 회전 속도 → 공에 전달
+        const tangVx = -el._omega * hitY;
+        const tangVy =  el._omega * hitX;
+        const vAlong = b.vx*levDx + b.vy*levDy;
+        b.vx = tangVx * 0.75 + levDx * vAlong * 0.5;
+        b.vy = tangVy * 0.75 + levDy * vAlong * 0.5;
+      } else {
+        // 지레 표면 위에서 굴러가는 중 (충돌 없지만 지레 위) → 경사 가속
+        const dx2=rx-lx, dy2=ry-ly, L2=Math.hypot(dx2,dy2);
+        if (L2>0) {
+          const t2 = Math.max(0,Math.min(1,((b.x-lx)*dx2+(b.y-ly)*dy2)/(L2*L2)));
+          const cpx=lx+dx2*t2, cpy=ly+dy2*t2;
+          if (Math.hypot(b.x-cpx,b.y-cpy) < ballRadius+8) {
+            b.vx += levDx * gravity * 0.5 * dt;
+            b.vy += levDy * gravity * 0.5 * dt;
+            b.vx *= 0.99;
+            onSurface = true;
+          }
+        }
+      }
+
+      // 자중 복원 (약한)
+      el._omega += Math.sin(el._angle) * (-0.003) * baseLen * dt;
+      el._omega *= 0.97;
+      el._angle += el._omega * dt;
+      const maxA = el.maxAngle || 0.65;
+      if (el._angle >  maxA) { el._angle =  maxA; el._omega *= -0.08; }
+      if (el._angle < -maxA) { el._angle = -maxA; el._omega *= -0.08; }
+    }
+
+    // slider physics
+    if (el.type === 'slider') {
+      const linked = el.linkedRampId ? elements.find(e=>e.id===el.linkedRampId) : null;
+      if (linked) {
+        const rdx = linked.x2-linked.x, rdy = linked.y2-linked.y;
+        const rL = Math.hypot(rdx,rdy);
+        const rUx = rdx/rL, rUy = rdy/rL;       // 경사로 단위벡터
+        const nUx = -rUy, nUy = rUx;             // 경사로 법선(위쪽)
+
+        // 슬라이더 현재 위치
+        if (el._pos === undefined) el._pos = el.offset * rL;
+        if (el._vel === undefined) el._vel = 0;
+
+        const sx = linked.x + rUx * el._pos;
+        const sy = linked.y + rUy * el._pos;
+
+        // 구슬이 슬라이더에 충돌했는지 (슬라이더 뒤쪽 면)
+        const toBall_x = b.x - sx, toBall_y = b.y - sy;
+        const along = toBall_x*rUx + toBall_y*rUy;   // 경사방향 거리
+        const perp  = toBall_x*nUx + toBall_y*nUy;   // 수직 거리
+
+        const sw = (el.width||40)/2;
+        const sh = (el.height||14);
+        // 공이 슬라이더 바로 뒤쪽(along: -ballR~0)이고 수직으로 슬라이더 위
+        if (along > -(ballRadius+sw) && along < sw && perp > -(sh+ballRadius+4) && perp < ballRadius+2) {
+          // 공의 경사로 방향 속도를 슬라이더에 전달 (충격)
+          const ballAlong = b.vx*rUx + b.vy*rUy;
+          if (ballAlong > el._vel) {
+            el._vel = ballAlong * 0.85;   // 에너지 전달
+            b.vx -= rUx * ballAlong * 0.6;
+            b.vy -= rUy * ballAlong * 0.6;
+          }
+        }
+
+        // 슬라이더 중력(경사 방향)
+        const gAlong = gravity * rUy;   // 경사 아래로 가속
+        el._vel += gAlong * dt;
+        el._vel *= 0.995;               // 슬라이더 마찰
+        el._pos += el._vel * dt;
+
+        // 경사로 범위 클램프
+        el._pos = Math.max(0, Math.min(rL, el._pos));
+        if (el._pos <= 0 || el._pos >= rL) el._vel = 0;
+
+        // 슬라이더 앞쪽에 있는 다른 공(B) 밀기
+        // → 시뮬에서는 메인볼이 유일하므로 슬라이더 앞쪽에 공이 있으면 경사방향으로 밀어냄
+        const frontAlong = (b.x - sx)*rUx + (b.y - sy)*rUy;
+        if (frontAlong > -sw && frontAlong < sw + ballRadius && perp > -(sh+ballRadius+4) && perp < ballRadius+2) {
+          if (el._vel > 0.5) {
+            b.vx += rUx * el._vel * 0.7;
+            b.vy += rUy * el._vel * 0.7;
+          }
+        }
+      }
+    }
+  }
+
+  b.x += b.vx * dt;
+  b.y += b.vy * dt;
+
+  // air resistance
+  b.vx *= 0.999;
+  if (!onSurface) b.vy *= 0.9995;
+
+  // trail
+  b.trail.push({ x: b.x, y: b.y });
+  if (b.trail.length > 40) b.trail.shift();
+}
+
+function segCollide(bx, by, vx, vy, ax, ay, cx, cy, r) {
+  const dx = cx - ax, dy = cy - ay;
+  const len2 = dx*dx + dy*dy;
+  if (len2 === 0) return null;
+  const t = Math.max(0, Math.min(1, ((bx-ax)*dx + (by-ay)*dy) / len2));
+  const px = ax + t*dx, py = ay + t*dy;
+  const ex = bx - px, ey = by - py;
+  const dist = Math.sqrt(ex*ex + ey*ey);
+  if (dist > r + 4 || dist < 0.001) return null;
+  const nx = ex/dist, ny = ey/dist;
+  const dot = vx*nx + vy*ny;
+  if (dot > 0) return null; // moving away
+  const bounce = 0.35;
+  return {
+    nx: px + nx*(r + 1),
+    ny: py + ny*(r + 1),
+    nvx: vx - (1+bounce)*dot*nx,
+    nvy: vy - (1+bounce)*dot*ny,
+  };
+}
+
+// ── Properties Panel ───────────────────────────────────
+function renderPropsPanel() {
+  const el = selected;
+  const c = document.getElementById('propsContent');
+  if (!el) {
+    c.innerHTML = '<div style="color:var(--muted);font-size:12px">요소를 선택하거나 추가하면 속성이 표시됩니다.</div>';
+    return;
+  }
+  let html = `<div class="prop-row"><label>이름</label><input type="text" value="${el.label}" onchange="if(selected)selected.label=this.value;renderElemList()" style="width:110px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:2px 6px;font-size:12px;font-family:'Noto Sans KR',sans-serif"></div>`;
+
+  if (el.type === 'lever') {
+    html += `<div class="prop-row"><label>받침점 위치</label>
+      <input type="range" min="10" max="90" value="${Math.round(el.pivotRatio*100)}"
+        oninput="if(selected)selected.pivotRatio=+this.value/100;document.getElementById('pv').textContent=this.value+'%';drawAll()"
+        style="width:80px;accent-color:var(--lever-col)">
+      <span id="pv" style="font-size:11px;color:var(--muted);min-width:32px">${Math.round(el.pivotRatio*100)}%</span></div>`;
+    const restDeg = Math.round((el.restAngle||0)*180/Math.PI);
+    html += `<div class="prop-row"><label>초기 기울기</label>
+      <input type="range" min="-30" max="30" value="${restDeg}"
+        oninput="if(selected){selected.restAngle=+this.value*Math.PI/180;selected._angle=selected.restAngle;document.getElementById('ra').textContent=this.value+'°';drawAll()}"
+        style="width:80px;accent-color:var(--lever-col)">
+      <span id="ra" style="font-size:11px;color:var(--muted);min-width:32px">${restDeg}°</span></div>`;
+    html += `<div class="prop-row"><label>회전 강도</label>
+      <input type="range" min="2" max="20" value="${Math.round((el.inertia||1.0)*5)}"
+        oninput="if(selected)selected.inertia=+this.value/5;drawAll()"
+        style="width:80px;accent-color:var(--lever-col)"></div>`;
+    html += `<div style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.6">
+      힘점 쪽에 구슬이 닿으면<br>받침점 중심으로 회전 →<br>작용점 쪽 구슬을 튕겨냅니다.</div>`;
+  }
+  if (el.type === 'ramp') {
+    html += `<div class="prop-row"><label>마찰계수</label>
+      <input type="range" min="80" max="100" value="${Math.round((el.friction||0.98)*100)}" oninput="if(selected)selected.friction=+this.value/100;document.getElementById('fr').textContent=(+this.value/100).toFixed(2);drawAll()" style="width:80px;accent-color:var(--push-col)">
+      <span id="fr" style="font-size:11px;color:var(--muted);min-width:32px">${(el.friction||0.98).toFixed(2)}</span></div>`;
+  }
+  if (el.type === 'slider') {
+    const ramps = elements.filter(e => e.type === 'ramp');
+    const opts = ramps.map(r => `<option value="${r.id}" ${el.linkedRampId===r.id?'selected':''}>${r.label}</option>`).join('');
+    html += `<div class="prop-row" style="flex-direction:column;align-items:flex-start;gap:4px">
+      <label style="color:var(--muted)">연결 경사로</label>
+      <select onchange="if(selected){selected.linkedRampId=+this.value;const r=elements.find(e=>e.id===selected.linkedRampId);if(r)selected._pos=selected.offset*Math.hypot(r.x2-r.x,r.y2-r.y);drawAll()}" style="width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 6px;font-size:12px">
+        <option value="">-- 경사로 선택 --</option>${opts}
+      </select></div>`;
+    html += `<div class="prop-row"><label>초기 위치</label>
+      <input type="range" min="5" max="90" value="${Math.round((el.offset||0.5)*100)}" oninput="if(selected){selected.offset=+this.value/100;const r=elements.find(e=>e.id===selected.linkedRampId);if(r)selected._pos=selected.offset*Math.hypot(r.x2-r.x,r.y2-r.y);drawAll()}" style="width:80px;accent-color:var(--push-col)">
+      <span style="font-size:11px;color:var(--muted);min-width:28px">${Math.round((el.offset||0.5)*100)}%</span></div>`;
+    html += `<div class="prop-row"><label>슬라이더 폭</label>
+      <input type="range" min="20" max="80" value="${el.width||40}" oninput="if(selected)selected.width=+this.value;drawAll()" style="width:80px;accent-color:var(--push-col)"></div>`;
+    html += `<div style="font-size:10px;color:var(--muted);margin-top:4px;line-height:1.6">구슬A가 슬라이더를 치면<br>슬라이더가 경사로를 따라 밀려가며<br>앞의 구슬B를 밀어냅니다.</div>`;
+  }
+  if (el.type === 'funnel') {
+    html += `<div class="prop-row"><label>너비</label>
+      <input type="range" min="20" max="120" value="${el.width||60}" oninput="if(selected)selected.width=+this.value;drawAll()" style="width:80px;accent-color:#60a5fa"></div>`;
+  }
+  if (el.type === 'wall') {
+    html += `<div class="prop-row"><label>반발계수</label>
+      <input type="range" min="0" max="100" value="${Math.round((el.bounce||0.5)*100)}" oninput="if(selected)selected.bounce=+this.value/100;drawAll()" style="width:80px"></div>`;
+  }
+
+  // coords
+  if (['ramp','lever','wall'].includes(el.type)) {
+    html += `<div style="font-size:10px;color:var(--muted);margin-top:4px">
+      시작 (${Math.round(el.x)}, ${Math.round(el.y)}) → 끝 (${Math.round(el.x2)}, ${Math.round(el.y2)})<br>
+      길이: ${Math.round(Math.hypot(el.x2-el.x, el.y2-el.y))}px
+    </div>`;
+  }
+
+  html += `<div style="margin-top:10px"><button class="btn btn-danger" onclick="deleteSelected()" style="width:100%;font-size:12px">🗑 이 요소 삭제</button></div>`;
+  c.innerHTML = html;
+}
+
+function deleteSelected() {
+  if (!selected) return;
+  elements = elements.filter(e => e !== selected);
+  selected = null;
+  renderPropsPanel();
+  renderElemList();
+  updateStats();
+  drawAll();
+}
+
+// ── Element List ───────────────────────────────────────
+function renderElemList() {
+  const list = document.getElementById('elemList');
+  if (elements.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted);font-size:11px;padding:6px">아직 요소가 없습니다</div>';
+    return;
+  }
+  list.innerHTML = elements.map(el => `
+    <div class="elem-item ${el===selected?'selected':''}" onclick="selectEl(${el.id})">
+      <span class="elem-dot" style="background:${COLORS[el.type]}"></span>
+      <span>${el.label}</span>
+      <span class="elem-del" onclick="event.stopPropagation();deleteEl(${el.id})">×</span>
+    </div>
+  `).join('');
+}
+
+function selectEl(id) {
+  selected = elements.find(e => e.id === id) || null;
+  renderPropsPanel();
+  renderElemList();
+  drawAll();
+}
+function deleteEl(id) {
+  elements = elements.filter(e => e.id !== id);
+  if (selected && selected.id === id) selected = null;
+  renderPropsPanel();
+  renderElemList();
+  updateStats();
+  drawAll();
+}
+
+// ── Stats ──────────────────────────────────────────────
+function updateStats() {
+  document.getElementById('stat-elems').textContent   = elements.length;
+  document.getElementById('stat-levers').textContent  = elements.filter(e=>e.type==='lever').length;
+  document.getElementById('stat-pushpull').textContent= elements.filter(e=>e.type==='slider').length;
+  document.getElementById('stat-ramps').textContent   = elements.filter(e=>e.type==='ramp').length;
+}
+
+// ── Example Menu ───────────────────────────────────────
+function toggleExampleMenu() {
+  const menu = document.getElementById('exampleMenu');
+  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+}
+document.addEventListener('click', e => {
+  if (!document.getElementById('exampleMenuWrap').contains(e.target)) {
+    document.getElementById('exampleMenu').style.display = 'none';
+  }
+});
+
+// ── Clear / Example ────────────────────────────────────
+function clearAll() {
+  if (elements.length && !confirm('모두 삭제하시겠어요?')) return;
+  elements = []; selected = null; idCounter = 0;
+  renderPropsPanel(); renderElemList(); updateStats(); drawAll();
+}
+
+function setBallStart(x, y) {
+  ballStartPos = { x, y };
+  document.getElementById('ballStartX').value = x;
+  document.getElementById('ballStartY').value = y;
+}
+
+function loadExample(idx) {
+  document.getElementById('exampleMenu').style.display = 'none';
+  elements = []; selected = null; idCounter = 0;
+
+  if (idx === 0) {
+    // ── 예시 0: 경사로 코스 (✅ 시뮬 검증 완료) ──────────
+    // 3단 계단식 내리막 → 목표
+    addElement('ramp', 60,  120, 350, 230);
+    addElement('ramp', 310, 280, 600, 380);
+    addElement('ramp', 560, 430, 800, 490);
+    addElement('goal', 840, 490);
+    setBallStart(72, 114);
+
+  } else if (idx === 1) {
+    // ── 예시 1: 지레 코스 ────────────────────────────────
+    // 진입 경사로 → 힘점(왼쪽)에 공이 강하게 닿음
+    // → 받침점 중심 회전 → 작용점(오른쪽)이 내려가며 공을 밀어냄
+    // → 출구 경사로 → 목표
+    addElement('ramp', 60, 60, 230, 230);        // 진입 경사로 (가파르게)
+    addElement('lever', 160, 255, 480, 255);     // 지레 수평 배치
+    const lev = elements[elements.length-1];
+    lev.pivotRatio = 0.38;                       // 받침점: 왼쪽 38%
+    lev.restAngle  = 0.20;                       // 초기 기울기: 힘점이 약간 낮음
+    lev._angle     = 0.20;
+    lev.inertia    = 0.6;
+    lev.maxAngle   = 0.65;
+    addElement('ramp', 450, 210, 720, 340);      // 출구 경사로
+    addElement('goal', 760, 345);
+    setBallStart(72, 55);
+
+  } else if (idx === 2) {
+    // ── 예시 2: 밀고당기기 코스 (✅ 시뮬 검증 완료) ──────
+    // 진입 경사로 → push가 공을 오른쪽으로 가속 → 3단 경사로 연속 → 목표
+    // 슬라이더 코스:
+    // 긴 경사로 위에 슬라이더 배치 → 구슬A(시작점)가 내려와 슬라이더를 치면
+    // 슬라이더가 밀려 내려가며 경사로 아래쪽에 미리 놓인 구슬B를 밀어 구멍(목표)으로 보냄
+    // 구현: 메인 경사로 + 슬라이더 + 아래 경사로 + 목표
+    addElement('ramp', 60, 100, 700, 380);      // 긴 메인 경사로
+    const mainRampId = elements[elements.length-1].id;
+    addElement('slider', 180, 170);              // 슬라이더 (경사로 위쪽에 배치)
+    elements[elements.length-1].linkedRampId = mainRampId;
+    elements[elements.length-1].offset = 0.25;  // 경사로 25% 위치
+    elements[elements.length-1].width  = 50;
+    const mainRamp = elements.find(e=>e.id===mainRampId);
+    const rL = Math.hypot(mainRamp.x2-mainRamp.x, mainRamp.y2-mainRamp.y);
+    elements[elements.length-1]._pos = 0.25 * rL;
+    elements[elements.length-1]._vel = 0;
+    addElement('ramp', 680, 365, 900, 440);     // 하단 출구 경사로
+    addElement('goal', 930, 440);
+    setBallStart(77, 96);
+  }
+
+  renderPropsPanel(); renderElemList(); updateStats(); drawAll();
+}
+
+// ── Init ───────────────────────────────────────────────
+(function init() {
+  resize();
+  setTool('ramp');
+  // 처음엔 빈 화면
+  setBallStart(80, 60);
+  drawAll();
+})();
+</script>
+</body>
+</html>
